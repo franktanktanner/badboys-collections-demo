@@ -1,11 +1,18 @@
 import { motion } from 'framer-motion';
 import { Database, RefreshCw, Shield } from 'lucide-react';
-import { scraperCounties } from '../../data/mockAttorneys';
+import { scraperCountiesAll } from '../../data/mockAttorneys';
 import { formatNumber } from '../../lib/format';
+import { countyFor, isFiltered, type LocationFilter } from '../../lib/filters';
 
-export function ScraperStatus() {
-  const total = scraperCounties.reduce((s, c) => s + c.records, 0);
-  const added = scraperCounties.reduce((s, c) => s + c.added, 0);
+export function ScraperStatus({ location }: { location: LocationFilter }) {
+  const county = countyFor(location);
+  const counties = isFiltered(location) && county
+    ? scraperCountiesAll.filter((c) => c.name === county)
+    : scraperCountiesAll;
+
+  const total = counties.reduce((s, c) => s + c.records, 0);
+  const added = counties.reduce((s, c) => s + c.added, 0);
+
   return (
     <div className="glass-card p-6">
       <div className="flex items-center gap-3">
@@ -15,27 +22,29 @@ export function ScraperStatus() {
         </div>
         <div>
           <h2 className="h-display text-lg">Scraper Status</h2>
-          <p className="mt-0.5 text-xs text-slate-400">Running continuously · last sync 3 minutes ago</p>
+          <p className="mt-0.5 text-xs text-slate-400">
+            {isFiltered(location) ? `Scoped to ${county} County` : 'Running continuously · last sync 3 minutes ago'}
+          </p>
         </div>
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
         <StatBox label="Total Records" value={formatNumber(total)} />
         <StatBox label="New Today" value={`+${formatNumber(added)}`} accent />
-        <StatBox label="Counties" value={String(scraperCounties.length)} />
+        <StatBox label="Counties" value={String(counties.length)} />
         <StatBox label="Data Quality" value="96%" accent />
       </div>
 
       <div className="mt-5">
         <div className="flex items-center justify-between">
-          <span className="label">Counties</span>
+          <span className="label">{isFiltered(location) ? 'County' : 'Counties'}</span>
           <span className="flex items-center gap-1.5 text-[11px] text-slate-500">
             <RefreshCw className="h-3 w-3 animate-spin" style={{ animationDuration: '4s' }} />
             Active
           </span>
         </div>
         <ul className="mt-3 space-y-1.5">
-          {scraperCounties.map((c, i) => (
+          {counties.map((c, i) => (
             <motion.li
               key={c.name}
               initial={{ opacity: 0, x: -6 }}

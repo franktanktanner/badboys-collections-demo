@@ -8,18 +8,21 @@ import { StatusBadge } from '../shared/StatusBadge';
 import { RiskMeter } from '../shared/RiskMeter';
 import { AccountDetail } from './AccountDetail';
 import { cn } from '../../lib/cn';
+import { isFiltered, type LocationFilter } from '../../lib/filters';
 
 interface Props {
   query: string;
   status: AccountStatus | 'All';
   sort: string;
+  location: LocationFilter;
 }
 
-export function AccountsTable({ query, status, sort }: Props) {
+export function AccountsTable({ query, status, sort, location }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const rows = useMemo(() => {
     let r = mockAccounts;
+    if (isFiltered(location)) r = r.filter((a) => a.office === location);
     if (status !== 'All') r = r.filter((a) => a.status === status);
     if (query) {
       const q = query.toLowerCase();
@@ -36,7 +39,7 @@ export function AccountsTable({ query, status, sort }: Props) {
       'Last Contact': (a, b) => new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime(),
     };
     return [...r].sort(sorters[sort] || sorters['Amount Owed']);
-  }, [query, status, sort]);
+  }, [query, status, sort, location]);
 
   return (
     <div className="glass-card overflow-hidden">

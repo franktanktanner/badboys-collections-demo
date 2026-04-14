@@ -200,12 +200,3 @@ export const mockAccounts: Account[] = defendants.map((def, i) => {
   };
 });
 
-export const officeStats = OFFICES.map((office) => {
-  const accts = mockAccounts.filter((a) => a.office === office);
-  const rand = seededRandom(office.length * 17);
-  const totalOwed = accts.reduce((s, a) => s + a.amountOwed, 0) + Math.floor(rand() * 8000000) + 2000000;
-  const accountsCount = accts.length * 35 + Math.floor(rand() * 80);
-  const collectionRate = 5 + rand() * 8;
-  const trend = (rand() - 0.3) * 4;
-  return { office, totalOwed, accountsCount, collectionRate, trend };
-});

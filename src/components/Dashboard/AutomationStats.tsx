@@ -1,23 +1,28 @@
 import { motion } from 'framer-motion';
 import { Phone, MessageSquare, Mail, DollarSign, CalendarClock, Search } from 'lucide-react';
 import { CountUp } from '../shared/CountUp';
+import { getAutomationStats, isFiltered, type LocationFilter } from '../../lib/filters';
 
-const stats = [
-  { Icon: Phone,         label: 'AI Calls Made',        value: 28_412, sub: 'avg 4.2 min call duration',    format: 'num' as const,     color: 'text-status-plan', bg: 'bg-status-plan/10' },
-  { Icon: MessageSquare, label: 'SMS Sent',             value: 94_281, sub: '22% response rate',            format: 'num' as const,     color: 'text-brand-gold', bg: 'bg-brand-gold/10' },
-  { Icon: Mail,          label: 'Emails Sent',          value: 42_109, sub: '41% open · 14% click',         format: 'num' as const,     color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10' },
-  { Icon: DollarSign,    label: 'Payments Collected',   value: 3_847_200, sub: 'across 1,842 transactions', format: 'currency' as const,color: 'text-status-active', bg: 'bg-status-active/10' },
-  { Icon: CalendarClock, label: 'Payment Plans',        value: 734,    sub: '83% completion rate',          format: 'num' as const,     color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-  { Icon: Search,        label: 'Skip Traces Run',      value: 1_287,  sub: '68% contact restoration',      format: 'num' as const,     color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-];
+export function AutomationStats({ location }: { location: LocationFilter }) {
+  const s = getAutomationStats(location);
 
-export function AutomationStats() {
+  const stats = [
+    { Icon: Phone,         label: 'AI Calls Made',      value: s.calls,    sub: 'avg 4.2 min call duration',    format: 'num' as const,      color: 'text-status-plan',   bg: 'bg-status-plan/10' },
+    { Icon: MessageSquare, label: 'SMS Sent',           value: s.sms,      sub: '22% response rate',            format: 'num' as const,      color: 'text-brand-gold',    bg: 'bg-brand-gold/10' },
+    { Icon: Mail,          label: 'Emails Sent',        value: s.emails,   sub: '41% open · 14% click',         format: 'num' as const,      color: 'text-fuchsia-400',   bg: 'bg-fuchsia-500/10' },
+    { Icon: DollarSign,    label: 'Payments Collected', value: s.payments, sub: 'total this period',            format: 'currency' as const, color: 'text-status-active', bg: 'bg-status-active/10' },
+    { Icon: CalendarClock, label: 'Payment Plans',      value: s.plans,    sub: '83% completion rate',          format: 'num' as const,      color: 'text-indigo-400',    bg: 'bg-indigo-500/10' },
+    { Icon: Search,        label: 'Skip Traces Run',    value: s.skip,     sub: '68% contact restoration',      format: 'num' as const,      color: 'text-cyan-400',      bg: 'bg-cyan-500/10' },
+  ];
+
   return (
     <div className="glass-card p-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="h-display text-lg">AI Automation · 30 Days</h2>
-          <p className="mt-0.5 text-xs text-slate-400">Actions executed by the agent fleet</p>
+          <p className="mt-0.5 text-xs text-slate-400">
+            {isFiltered(location) ? `${location} fleet` : 'Actions executed by the agent fleet'}
+          </p>
         </div>
         <span className="chip text-brand-goldlight">
           <span className="h-1.5 w-1.5 rounded-full bg-brand-gold" />

@@ -1,30 +1,39 @@
-import { ChevronDown, Calendar, Sparkles, Bell } from 'lucide-react';
+import { ChevronDown, Calendar, Sparkles, Bell, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { cn } from '../../lib/cn';
-
-const LOCATIONS = [
-  'All Locations', 'San Jose', 'Oakland', 'Redwood City', 'Los Angeles',
-  'Santa Ana', 'San Diego', 'Modesto', 'Stockton', 'Long Beach',
-  'Anaheim', 'San Bernardino', 'Riverside',
-];
+import { LOCATIONS, type LocationFilter } from '../../lib/filters';
 
 const DATE_RANGES = ['Last 24 hours', 'Last 7 days', 'Last 30 days', 'Last 90 days', 'Year to date'];
 
-function Dropdown({ options, icon }: { options: string[]; icon?: React.ReactNode }) {
+function Dropdown({
+  options,
+  value,
+  onChange,
+  icon,
+  active,
+}: {
+  options: readonly string[];
+  value: string;
+  onChange: (v: string) => void;
+  icon?: React.ReactNode;
+  active?: boolean;
+}) {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(options[0]);
   return (
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="btn-secondary !py-1.5 text-xs"
+        className={cn(
+          'btn-secondary !py-1.5 text-xs',
+          active && 'border-brand-gold/40 bg-brand-gold/10 text-brand-goldlight hover:border-brand-gold/60 hover:bg-brand-gold/15',
+        )}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
         {icon}
-        <span className="text-slate-200">{selected}</span>
-        <ChevronDown className={cn('h-3.5 w-3.5 text-slate-400 transition-transform', open && 'rotate-180')} />
+        <span className={active ? 'text-brand-goldlight' : 'text-slate-200'}>{value}</span>
+        <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', active ? 'text-brand-gold' : 'text-slate-400', open && 'rotate-180')} />
       </button>
       {open && (
         <>
@@ -37,10 +46,10 @@ function Dropdown({ options, icon }: { options: string[]; icon?: React.ReactNode
             {options.map((opt) => (
               <button
                 key={opt}
-                onClick={() => { setSelected(opt); setOpen(false); }}
+                onClick={() => { onChange(opt); setOpen(false); }}
                 className={cn(
                   'flex w-full cursor-pointer items-center rounded-md px-3 py-1.5 text-left text-xs transition-colors',
-                  selected === opt ? 'bg-brand-gold/10 text-brand-goldlight' : 'text-slate-300 hover:bg-bg-elevated hover:text-white',
+                  value === opt ? 'bg-brand-gold/10 text-brand-goldlight' : 'text-slate-300 hover:bg-bg-elevated hover:text-white',
                 )}
               >
                 {opt}
@@ -53,7 +62,15 @@ function Dropdown({ options, icon }: { options: string[]; icon?: React.ReactNode
   );
 }
 
-export function TopNav() {
+export function TopNav({
+  location,
+  onLocationChange,
+}: {
+  location: LocationFilter;
+  onLocationChange: (loc: LocationFilter) => void;
+}) {
+  const [dateRange, setDateRange] = useState(DATE_RANGES[2]);
+  const filtered = location !== 'All Locations';
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg-base/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -74,10 +91,21 @@ export function TopNav() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="hidden md:flex">
-            <Dropdown options={LOCATIONS} />
+            <Dropdown
+              options={LOCATIONS}
+              value={location}
+              onChange={(v) => onLocationChange(v as LocationFilter)}
+              icon={<MapPin className="h-3.5 w-3.5" />}
+              active={filtered}
+            />
           </div>
           <div className="hidden lg:flex">
-            <Dropdown options={DATE_RANGES} icon={<Calendar className="h-3.5 w-3.5 text-slate-400" />} />
+            <Dropdown
+              options={DATE_RANGES}
+              value={dateRange}
+              onChange={setDateRange}
+              icon={<Calendar className="h-3.5 w-3.5 text-slate-400" />}
+            />
           </div>
 
           <div className="flex items-center gap-2 rounded-full border border-status-active/25 bg-status-active/10 px-3 py-1.5">

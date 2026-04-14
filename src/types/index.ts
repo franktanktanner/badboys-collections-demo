@@ -90,6 +90,7 @@ export interface Attorney {
   firm: string;
   specialty: string;
   location: string;
+  office: Office;
   email: string;
   phone: string;
   status: AttorneyStatus;

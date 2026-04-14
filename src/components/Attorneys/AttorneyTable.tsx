@@ -4,16 +4,22 @@ import { mockAttorneys } from '../../data/mockAttorneys';
 import { StatusBadge } from '../shared/StatusBadge';
 import { formatCurrency } from '../../lib/format';
 import { cn } from '../../lib/cn';
+import { isFiltered, type LocationFilter } from '../../lib/filters';
 
-export function AttorneyTable() {
+export function AttorneyTable({ location }: { location: LocationFilter }) {
+  const attorneys = isFiltered(location)
+    ? mockAttorneys.filter((a) => a.office === location)
+    : mockAttorneys;
   return (
     <div className="glass-card overflow-hidden">
       <div className="flex items-center justify-between p-5">
         <div>
           <h2 className="h-display text-lg">Attorney Outreach Pipeline</h2>
-          <p className="mt-0.5 text-xs text-slate-400">Criminal defense attorneys · California</p>
+          <p className="mt-0.5 text-xs text-slate-400">
+            {isFiltered(location) ? `Criminal defense attorneys · ${location}` : 'Criminal defense attorneys · California'}
+          </p>
         </div>
-        <span className="chip text-slate-300">{mockAttorneys.length} attorneys</span>
+        <span className="chip text-slate-300">{attorneys.length} attorneys</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -31,7 +37,14 @@ export function AttorneyTable() {
             </tr>
           </thead>
           <tbody>
-            {mockAttorneys.map((a, i) => (
+            {attorneys.length === 0 && (
+              <tr>
+                <td colSpan={9} className="p-10 text-center text-sm text-slate-500">
+                  No attorneys scoped to {isFiltered(location) ? location : 'this view'} yet.
+                </td>
+              </tr>
+            )}
+            {attorneys.map((a, i) => (
               <motion.tr
                 key={a.id}
                 initial={{ opacity: 0, y: 6 }}

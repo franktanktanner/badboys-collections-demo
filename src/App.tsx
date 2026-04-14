@@ -6,13 +6,15 @@ import { CommandCenter } from './pages/CommandCenter';
 import { Accounts } from './pages/Accounts';
 import { Automation } from './pages/Automation';
 import { AttorneyPipeline } from './pages/AttorneyPipeline';
+import type { LocationFilter } from './lib/filters';
 
 export default function App() {
   const [tab, setTab] = useState<TabKey>('command');
+  const [location, setLocation] = useState<LocationFilter>('All Locations');
 
   return (
     <div className="min-h-screen text-slate-100">
-      <TopNav />
+      <TopNav location={location} onLocationChange={setLocation} />
       <TabNav active={tab} onChange={setTab} />
 
       <main className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
@@ -24,10 +26,10 @@ export default function App() {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
-            {tab === 'command'    && <CommandCenter />}
-            {tab === 'accounts'   && <Accounts />}
+            {tab === 'command'    && <CommandCenter location={location} />}
+            {tab === 'accounts'   && <Accounts location={location} />}
             {tab === 'automation' && <Automation />}
-            {tab === 'attorneys'  && <AttorneyPipeline />}
+            {tab === 'attorneys'  && <AttorneyPipeline location={location} />}
           </motion.div>
         </AnimatePresence>
       </main>
