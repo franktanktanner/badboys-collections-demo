@@ -10,7 +10,7 @@ export function RecoveryPipeline({ location }: { location: LocationFilter }) {
     : TOTAL_ACCOUNTS;
 
   return (
-    <div className="glass-card p-6">
+    <div className="glass-card flex h-full flex-col p-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="h-display text-lg">Recovery Pipeline</h2>
@@ -24,7 +24,7 @@ export function RecoveryPipeline({ location }: { location: LocationFilter }) {
         </span>
       </div>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 flex flex-1 flex-col justify-around gap-4">
         {stages.map((s, i) => {
           const widthPct = max > 0 ? (s.amount / max) * 100 : 0;
           return (

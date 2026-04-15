@@ -15,7 +15,7 @@ export function CommandCenter({ location }: { location: LocationFilter }) {
   const filtered = isFiltered(location);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {filtered && <LocationBanner location={location} />}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -69,7 +69,7 @@ export function CommandCenter({ location }: { location: LocationFilter }) {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <RecoveryPipeline location={location} />
         </div>
