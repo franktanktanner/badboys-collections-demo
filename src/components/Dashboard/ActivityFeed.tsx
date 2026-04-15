@@ -22,7 +22,7 @@ export function ActivityFeed({ location }: { location: LocationFilter }) {
     : mockActivity;
 
   return (
-    <div className="glass-card flex h-full flex-col p-6">
+    <div className="glass-card flex h-full max-h-[560px] flex-col p-6 xl:max-h-[560px]">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="h-display text-lg">Live Activity</h2>

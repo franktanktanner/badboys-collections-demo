@@ -73,10 +73,10 @@ export function CommandCenter({ location }: { location: LocationFilter }) {
         <div className="xl:col-span-2">
           <RecoveryPipeline location={location} />
         </div>
-        <div className="xl:row-span-2">
+        <div>
           <ActivityFeed location={location} />
         </div>
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-3">
           <OfficeGrid location={location} />
         </div>
       </div>
