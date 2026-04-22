@@ -8,12 +8,6 @@ export const LOCATIONS: ('All Locations' | Office)[] = [
   'Los Angeles',
   'Santa Ana',
   'San Diego',
-  'Modesto',
-  'Stockton',
-  'Long Beach',
-  'Anaheim',
-  'San Bernardino',
-  'Riverside',
 ];
 
 export type LocationFilter = (typeof LOCATIONS)[number];
@@ -35,18 +29,12 @@ export interface OfficeStat {
 }
 
 export const OFFICE_STATS: Record<Office, OfficeStat> = {
-  'Los Angeles':    { office: 'Los Angeles',    totalOwed: 24_500_000, accountsCount: 690, collectionRate: 7.2,  trend: 2.8 },
-  'San Jose':       { office: 'San Jose',       totalOwed: 18_200_000, accountsCount: 540, collectionRate: 10.4, trend: 3.1 },
-  'Oakland':        { office: 'Oakland',        totalOwed: 15_800_000, accountsCount: 485, collectionRate: 9.1,  trend: 1.8 },
-  'San Diego':      { office: 'San Diego',      totalOwed: 13_600_000, accountsCount: 420, collectionRate: 8.4,  trend: 2.2 },
-  'Santa Ana':      { office: 'Santa Ana',      totalOwed: 10_900_000, accountsCount: 360, collectionRate: 8.9,  trend: 1.4 },
-  'Long Beach':     { office: 'Long Beach',     totalOwed: 9_400_000,  accountsCount: 310, collectionRate: 7.8,  trend: -0.6 },
-  'Riverside':      { office: 'Riverside',      totalOwed: 8_700_000,  accountsCount: 295, collectionRate: 6.9,  trend: 0.9 },
-  'Anaheim':        { office: 'Anaheim',        totalOwed: 8_100_000,  accountsCount: 280, collectionRate: 8.1,  trend: 1.1 },
-  'San Bernardino': { office: 'San Bernardino', totalOwed: 7_800_000,  accountsCount: 270, collectionRate: 6.4,  trend: -1.2 },
-  'Stockton':       { office: 'Stockton',       totalOwed: 7_200_000,  accountsCount: 245, collectionRate: 7.1,  trend: -0.4 },
-  'Modesto':        { office: 'Modesto',        totalOwed: 5_400_000,  accountsCount: 180, collectionRate: 7.6,  trend: 0.7 },
-  'Redwood City':   { office: 'Redwood City',   totalOwed: 5_400_000,  accountsCount: 172, collectionRate: 11.2, trend: 3.6 },
+  'Los Angeles':    { office: 'Los Angeles',    totalOwed: 34_000_000, accountsCount: 1070, collectionRate: 7.4,  trend: 2.6 },
+  'San Jose':       { office: 'San Jose',       totalOwed: 28_500_000, accountsCount: 900,  collectionRate: 10.2, trend: 3.2 },
+  'Oakland':        { office: 'Oakland',        totalOwed: 23_000_000, accountsCount: 730,  collectionRate: 9.0,  trend: 1.9 },
+  'San Diego':      { office: 'San Diego',      totalOwed: 19_500_000, accountsCount: 630,  collectionRate: 8.3,  trend: 2.1 },
+  'Santa Ana':      { office: 'Santa Ana',      totalOwed: 17_500_000, accountsCount: 560,  collectionRate: 8.6,  trend: 1.5 },
+  'Redwood City':   { office: 'Redwood City',   totalOwed: 12_500_000, accountsCount: 357,  collectionRate: 11.1, trend: 3.5 },
 };
 
 export const officeStatsList: OfficeStat[] = Object.values(OFFICE_STATS);
@@ -170,14 +158,8 @@ const COUNTY_BY_OFFICE: Record<Office, string> = {
   'Oakland': 'Alameda',
   'Redwood City': 'San Mateo',
   'Los Angeles': 'Los Angeles',
-  'Long Beach': 'Los Angeles',
   'Santa Ana': 'Orange',
-  'Anaheim': 'Orange',
   'San Diego': 'San Diego',
-  'Modesto': 'Stanislaus',
-  'Stockton': 'San Joaquin',
-  'San Bernardino': 'San Bernardino',
-  'Riverside': 'Riverside',
 };
 
 export function countyFor(loc: LocationFilter): string | null {

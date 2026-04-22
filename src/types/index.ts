@@ -11,13 +11,7 @@ export type Office =
   | 'Redwood City'
   | 'Los Angeles'
   | 'Santa Ana'
-  | 'San Diego'
-  | 'Modesto'
-  | 'Stockton'
-  | 'Long Beach'
-  | 'Anaheim'
-  | 'San Bernardino'
-  | 'Riverside';
+  | 'San Diego';
 
 export interface Payment {
   date: string;
@@ -80,23 +74,6 @@ export interface Activity {
   outcome?: string;
   amount?: number;
   office?: Office;
-}
-
-export type AttorneyStatus = 'New' | 'Contacted' | 'Warm' | 'Partner' | 'Inactive';
-
-export interface Attorney {
-  id: string;
-  name: string;
-  firm: string;
-  specialty: string;
-  location: string;
-  office: Office;
-  email: string;
-  phone: string;
-  status: AttorneyStatus;
-  referrals: number;
-  revenue: number;
-  lastContact: string;
 }
 
 export interface TranscriptTurn {

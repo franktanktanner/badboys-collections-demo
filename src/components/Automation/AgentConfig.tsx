@@ -10,7 +10,7 @@ const features = [
   { key: 'skip',   Icon: Search,        title: 'Skip Tracing',       desc: 'Auto-triggers skip trace when contact info goes stale or calls/texts bounce. Pulls new phone, address, and employment data.',                stat: '68% restore rate' },
   { key: 'legal',  Icon: Gavel,         title: 'Legal Escalation',   desc: 'Auto-generates demand letters when accounts exceed configurable thresholds. Queues for legal review before sending.',                        stat: '214 letters queued' },
   { key: 'plan',   Icon: CalendarClock, title: 'Payment Plan AI',    desc: 'Analyzes indemnitor payment history and estimates capacity. Proposes optimized payment plans with highest likelihood of completion.',        stat: '83% completion' },
-  { key: 'court',  Icon: Building2,     title: 'Courthouse Data Sync', desc: 'Pulls public court records to track case status, sentencing, and warrant information automatically.',                                      stat: '12 counties synced' },
+  { key: 'court',  Icon: Building2,     title: 'Courthouse Data Sync', desc: 'Pulls public court records to track case status, sentencing, and warrant information automatically.',                                      stat: '6 counties synced' },
 ];
 
 export function AgentConfig() {

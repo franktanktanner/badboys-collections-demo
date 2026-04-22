@@ -18,7 +18,7 @@ export function OfficeGrid({ location }: { location: LocationFilter }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="h-display text-lg">Collections by Office</h2>
-          <p className="mt-0.5 text-xs text-slate-400">12 California locations</p>
+          <p className="mt-0.5 text-xs text-slate-400">6 California locations</p>
         </div>
         <div className="flex items-center gap-1 rounded-lg border border-border bg-bg-elevated/60 p-1">
           {(['amount', 'rate'] as const).map((k) => (

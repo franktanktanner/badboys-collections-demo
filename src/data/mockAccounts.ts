@@ -1,9 +1,7 @@
 import type { Account, AccountStatus, Office } from '../types';
 
 const OFFICES: Office[] = [
-  'San Jose', 'Oakland', 'Redwood City', 'Los Angeles', 'Santa Ana',
-  'San Diego', 'Modesto', 'Stockton', 'Long Beach', 'Anaheim',
-  'San Bernardino', 'Riverside',
+  'San Jose', 'Oakland', 'Redwood City', 'Los Angeles', 'Santa Ana', 'San Diego',
 ];
 
 const defendants = [
@@ -75,12 +73,6 @@ const addresses = [
   '1733 W Vernon Ave, Los Angeles, CA 90062',
   '2315 N Tustin Ave, Santa Ana, CA 92705',
   '3902 University Ave, San Diego, CA 92105',
-  '1201 H St, Modesto, CA 95354',
-  '615 E Weber Ave, Stockton, CA 95202',
-  '425 Pine Ave, Long Beach, CA 90802',
-  '801 S Euclid St, Anaheim, CA 92802',
-  '345 E Baseline Rd, San Bernardino, CA 92410',
-  '3520 14th St, Riverside, CA 92501',
 ];
 
 function seededRandom(seed: number) {
