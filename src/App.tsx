@@ -5,7 +5,7 @@ import { TabNav, type TabKey } from './components/Layout/TabNav';
 import { CommandCenter } from './pages/CommandCenter';
 import { Accounts } from './pages/Accounts';
 import { Automation } from './pages/Automation';
-import { AttorneyPipeline } from './pages/AttorneyPipeline';
+import { Reports } from './pages/Reports';
 import type { LocationFilter } from './lib/filters';
 
 export default function App() {
@@ -29,7 +29,7 @@ export default function App() {
             {tab === 'command'    && <CommandCenter location={location} />}
             {tab === 'accounts'   && <Accounts location={location} />}
             {tab === 'automation' && <Automation />}
-            {tab === 'attorneys'  && <AttorneyPipeline location={location} />}
+            {tab === 'reports'    && <Reports location={location} />}
           </motion.div>
         </AnimatePresence>
       </main>
