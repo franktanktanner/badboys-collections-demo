@@ -9,6 +9,7 @@ import {
   outstandingTrend, kpiTrend, aiActionsTrend, recoveredTrend,
 } from '../data/mockActivity';
 import { getKPIs, isFiltered, type LocationFilter } from '../lib/filters';
+import { agencyConfig } from '../config/agencyConfig';
 
 export function CommandCenter({ location }: { location: LocationFilter }) {
   const kpis = getKPIs(location);
@@ -20,12 +21,12 @@ export function CommandCenter({ location }: { location: LocationFilter }) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KPICard
-          label="Total Outstanding"
+          label={agencyConfig.labels.totalReceivables}
           value={kpis.outstanding}
           format="currency-compact"
           sub={`across ${kpis.accounts.toLocaleString()} accounts`}
           trendValue={kpis.outstandingTrend}
-          trendDirection={filtered ? (kpis.outstandingTrend > 0 ? 'up' : 'down') : 'up'}
+          trendDirection={kpis.outstandingTrend > 0 ? 'up' : 'down'}
           trendGood="down"
           chartData={outstandingTrend}
           accent="gold"
@@ -56,7 +57,7 @@ export function CommandCenter({ location }: { location: LocationFilter }) {
           delay={0.16}
         />
         <KPICard
-          label="Recovered This Month"
+          label={agencyConfig.labels.dollarsRecovered}
           value={kpis.recovered}
           format="currency-compact"
           sub={`vs ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 0 }).format(kpis.recoveredPrev)} last month`}

@@ -1,7 +1,8 @@
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, MessageSquare, Mail, DollarSign, Search, AlertTriangle, CalendarClock, Gavel } from 'lucide-react';
 import { mockActivity } from '../../data/mockActivity';
-import type { ActivityType } from '../../types';
+import type { Activity, ActivityType } from '../../types';
 import { formatCurrency, relativeTime } from '../../lib/format';
 import { isFiltered, type LocationFilter } from '../../lib/filters';
 
@@ -16,13 +17,56 @@ const ICONS: Record<ActivityType, { Icon: typeof Phone; bg: string; text: string
   legal:        { Icon: Gavel,         bg: 'bg-status-legal/10',      text: 'text-status-legal' },
 };
 
+const INITIAL_VISIBLE = 6;
+const MAX_VISIBLE = 12;
+const MIN_DELAY_MS = 8000;
+const MAX_DELAY_MS = 15000;
+const REFRESH_INTERVAL_MS = 30000;
+
 export function ActivityFeed({ location }: { location: LocationFilter }) {
-  const events = isFiltered(location)
-    ? mockActivity.filter((a) => a.office === location)
-    : mockActivity;
+  const pool = useMemo<Activity[]>(
+    () => (isFiltered(location) ? mockActivity.filter((a) => a.office === location) : mockActivity),
+    [location],
+  );
+
+  const [visibleEvents, setVisibleEvents] = useState<Activity[]>(() => pool.slice(0, INITIAL_VISIBLE));
+  const [, forceTick] = useState(0);
+
+  useEffect(() => {
+    setVisibleEvents(pool.slice(0, INITIAL_VISIBLE));
+  }, [pool]);
+
+  useEffect(() => {
+    if (pool.length === 0) return;
+    let timeoutId: number;
+    let cursor = INITIAL_VISIBLE;
+
+    const scheduleNext = () => {
+      const delay = MIN_DELAY_MS + Math.random() * (MAX_DELAY_MS - MIN_DELAY_MS);
+      timeoutId = window.setTimeout(() => {
+        const source = pool[cursor % pool.length];
+        const next: Activity = {
+          ...source,
+          id: `${source.id}-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+        };
+        setVisibleEvents((prev) => [next, ...prev].slice(0, MAX_VISIBLE));
+        cursor += 1;
+        scheduleNext();
+      }, delay);
+    };
+
+    scheduleNext();
+    return () => window.clearTimeout(timeoutId);
+  }, [pool]);
+
+  useEffect(() => {
+    const ticker = window.setInterval(() => forceTick((n) => n + 1), REFRESH_INTERVAL_MS);
+    return () => window.clearInterval(ticker);
+  }, []);
 
   return (
-    <div className="glass-card flex h-full max-h-[560px] flex-col p-6 xl:max-h-[560px]">
+    <div className="glass-card flex h-full max-h-[560px] flex-col p-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="h-display text-lg">Live Activity</h2>
@@ -30,34 +74,40 @@ export function ActivityFeed({ location }: { location: LocationFilter }) {
             {isFiltered(location) ? `${location} events` : 'System events across all offices'}
           </p>
         </div>
-        <span className="chip text-slate-300">
+        <motion.span
+          className="chip text-slate-300"
+          animate={{ opacity: [0.85, 1, 0.85], scale: [1, 1.02, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+        >
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping-slow rounded-full bg-status-active opacity-70" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-status-active" />
           </span>
           Live
-        </span>
+        </motion.span>
       </div>
 
       <div className="mt-5 -mr-2 flex-1 overflow-y-auto pr-2">
-        <AnimatePresence initial>
-          <div className="relative">
-            <div className="absolute bottom-0 left-[15px] top-2 w-px bg-gradient-to-b from-border via-border to-transparent" />
-            {events.length === 0 ? (
-              <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-xs text-slate-500">
-                No recent activity for this office
-              </div>
-            ) : (
-              <ul className="space-y-3">
-                {events.map((a, i) => {
+        <div className="relative">
+          <div className="absolute bottom-0 left-[15px] top-2 w-px bg-gradient-to-b from-border via-border to-transparent" />
+          {visibleEvents.length === 0 ? (
+            <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-xs text-slate-500">
+              No recent activity for this office
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              <AnimatePresence initial={false}>
+                {visibleEvents.map((a) => {
                   const { Icon, bg, text } = ICONS[a.type];
                   return (
                     <motion.li
                       key={a.id}
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.4) }}
-                      className="relative flex gap-3"
+                      layout
+                      initial={{ opacity: 0, y: -24, height: 0 }}
+                      animate={{ opacity: 1, y: 0, height: 'auto' }}
+                      exit={{ opacity: 0, y: 16, height: 0 }}
+                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      className="relative flex gap-3 overflow-hidden"
                     >
                       <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border ${bg}`}>
                         <Icon className={`h-3.5 w-3.5 ${text}`} />
@@ -77,10 +127,10 @@ export function ActivityFeed({ location }: { location: LocationFilter }) {
                     </motion.li>
                   );
                 })}
-              </ul>
-            )}
-          </div>
-        </AnimatePresence>
+              </AnimatePresence>
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

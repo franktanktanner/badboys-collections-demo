@@ -16,6 +16,10 @@ export const callTranscript: TranscriptTurn[] = [
 ];
 
 export const callSummary = {
+  agentName: 'Ava',
+  customerName: 'Rosa Reyes',
+  bondId: 'BB-2024-1040',
+  contactRole: 'indemnitor',
   duration: '1m 58s',
   outcome: 'Payment plan accepted',
   planTerms: '$425/mo × 30 mo',

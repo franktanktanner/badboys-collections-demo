@@ -1,14 +1,15 @@
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Users, Bot, BarChart3 } from 'lucide-react';
 import { cn } from '../../lib/cn';
+import { agencyConfig } from '../../config/agencyConfig';
 
 export type TabKey = 'command' | 'accounts' | 'automation' | 'reports';
 
 const TABS: { key: TabKey; label: string; icon: typeof LayoutDashboard }[] = [
-  { key: 'command', label: 'Command Center', icon: LayoutDashboard },
-  { key: 'accounts', label: 'Accounts', icon: Users },
-  { key: 'automation', label: 'AI Automation', icon: Bot },
-  { key: 'reports', label: 'Reports', icon: BarChart3 },
+  { key: 'command', label: agencyConfig.labels.commandCenter, icon: LayoutDashboard },
+  { key: 'accounts', label: agencyConfig.labels.accounts, icon: Users },
+  { key: 'automation', label: agencyConfig.labels.automation, icon: Bot },
+  { key: 'reports', label: agencyConfig.labels.reports, icon: BarChart3 },
 ];
 
 export function TabNav({ active, onChange }: { active: TabKey; onChange: (k: TabKey) => void }) {

@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Line, LineChart } from 'recharts';
 
 type Datum = { value: number; [key: string]: number };
@@ -13,7 +14,7 @@ export function MiniSparkline({
   height?: number;
   variant?: 'area' | 'line';
 }) {
-  const id = `grad-${Math.random().toString(36).slice(2, 9)}`;
+  const id = useId().replaceAll(':', '');
   return (
     <div style={{ height }} className="w-full">
       <ResponsiveContainer width="100%" height="100%">

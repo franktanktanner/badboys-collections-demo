@@ -7,6 +7,7 @@ import { Accounts } from './pages/Accounts';
 import { Automation } from './pages/Automation';
 import { Reports } from './pages/Reports';
 import type { LocationFilter } from './lib/filters';
+import { agencyConfig } from './config/agencyConfig';
 
 export default function App() {
   const [tab, setTab] = useState<TabKey>('command');
@@ -36,8 +37,8 @@ export default function App() {
 
       <footer className="mt-12 border-t border-border">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-2 px-4 py-5 text-[11px] text-slate-500 sm:px-6 lg:px-8">
-          <span>Bad Boys Bail Bonds · Collections Command Center</span>
-          <span className="font-mono">"Because Your Mama Wants You Home!" · 1.800.BAIL.OUT</span>
+          <span>{agencyConfig.name} · {agencyConfig.dashboardTitle}</span>
+          <span className="font-mono">"{agencyConfig.slogan}" · {agencyConfig.displayPhone}</span>
         </div>
       </footer>
     </div>

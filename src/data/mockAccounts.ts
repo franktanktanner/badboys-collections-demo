@@ -4,104 +4,124 @@ const OFFICES: Office[] = [
   'San Jose', 'Oakland', 'Redwood City', 'Los Angeles', 'Santa Ana', 'San Diego',
 ];
 
-const defendants = [
-  { name: 'Marcus Reyes', charges: 'Felony DUI, Evasion', dob: '1987-03-14' },
-  { name: 'Darius Whitfield', charges: 'Possession w/ Intent', dob: '1991-07-22' },
-  { name: 'Jasmine Okafor', charges: 'Assault w/ Deadly Weapon', dob: '1994-11-02' },
-  { name: 'Luis Carrillo', charges: 'Grand Theft Auto', dob: '1989-05-30' },
-  { name: 'Tanya Brooks', charges: 'Drug Trafficking', dob: '1983-09-18' },
-  { name: 'Devon Nakamura', charges: 'Burglary, Resisting Arrest', dob: '1992-02-11' },
-  { name: 'Priya Kapoor', charges: 'Embezzlement', dob: '1986-12-04' },
-  { name: 'Antonio Molina', charges: 'Felony Weapons', dob: '1990-06-27' },
-  { name: 'Keisha Williams', charges: 'Domestic Battery', dob: '1988-04-19' },
-  { name: 'Rashid Abdullah', charges: 'Robbery', dob: '1995-08-09' },
-  { name: 'Valentina Russo', charges: 'Fraud, Identity Theft', dob: '1982-10-25' },
-  { name: 'Tyrone Jackson', charges: 'Attempted Murder', dob: '1984-01-15' },
-  { name: 'Mei Chen', charges: 'Cybercrime, Wire Fraud', dob: '1990-03-21' },
-  { name: 'Sergio Vasquez', charges: 'Felony DUI', dob: '1987-07-06' },
-  { name: 'Ebony Foster', charges: 'Possession', dob: '1993-11-28' },
-  { name: 'Kwame Adeyemi', charges: 'Gang Enhancement, Assault', dob: '1991-04-03' },
-  { name: 'Alejandra Torres', charges: 'Human Trafficking', dob: '1985-09-12' },
-  { name: 'Brendan O\'Sullivan', charges: 'Manslaughter', dob: '1988-02-19' },
-  { name: 'Sunita Patel', charges: 'Check Fraud', dob: '1992-06-14' },
-  { name: 'Derrick Coleman', charges: 'Armed Robbery', dob: '1989-12-07' },
-  { name: 'Yuki Tanaka', charges: 'Money Laundering', dob: '1986-05-23' },
-  { name: 'Jamal Pierce', charges: 'Felony Evasion, Narcotics', dob: '1993-08-31' },
-  { name: 'Rosalind Nguyen', charges: 'Extortion', dob: '1987-01-09' },
-  { name: 'Emilio Bautista', charges: 'Vehicular Homicide', dob: '1984-10-17' },
-  { name: 'Naomi Osei', charges: 'Aggravated Assault', dob: '1991-03-26' },
-  { name: 'Hector Ramirez', charges: 'Felony DUI, Hit & Run', dob: '1990-11-04' },
-  { name: 'Chanel Mbeki', charges: 'Narcotics Distribution', dob: '1988-07-18' },
-  { name: 'Mikhail Volkov', charges: 'Organized Crime', dob: '1981-09-05' },
+const FIRST_NAMES = [
+  'Marcus', 'Anthony', 'James', 'David', 'Robert', 'Michael', 'William', 'Joseph',
+  'Christopher', 'Daniel', 'Matthew', 'Ricardo', 'Sergio', 'Eduardo', 'Manuel',
+  'Rajesh', 'DeMarcus', 'Tyrone', 'Hakeem', 'Carlos', 'Hector', 'Pedro', 'Octavio',
+  'Diego', 'Fernando', 'Mikhail', 'Brendan', 'Andre', 'Jamal', 'Kwame', 'Wei',
 ];
 
-const indemnitors = [
-  { name: 'Rosa Reyes', employer: 'Valley Memorial Hospital', email: 'rosa.reyes@email.com' },
-  { name: 'Gloria Whitfield', employer: 'Amazon Fulfillment', email: 'gwhitfield@email.com' },
-  { name: 'Ifeoma Okafor', employer: 'Self-Employed', email: 'ifeoma.okafor@email.com' },
-  { name: 'Maria Carrillo', employer: 'Kaiser Permanente', email: 'm.carrillo@email.com' },
-  { name: 'Denise Brooks', employer: 'SF Unified School District', email: 'dbrooks@email.com' },
-  { name: 'Yuki Nakamura', employer: 'Tesla', email: 'ynakamura@email.com' },
-  { name: 'Rajesh Kapoor', employer: 'Google', email: 'rkapoor@email.com' },
-  { name: 'Esperanza Molina', employer: 'Restaurant Owner', email: 'esperanza.m@email.com' },
-  { name: 'Eloise Williams', employer: 'USPS', email: 'eloise.w@email.com' },
-  { name: 'Fatima Abdullah', employer: 'Cerritos College', email: 'fatima.a@email.com' },
-  { name: 'Marco Russo', employer: 'Construction Foreman', email: 'marco.russo@email.com' },
-  { name: 'Latoya Jackson', employer: 'Oakland Parks & Rec', email: 'ljackson@email.com' },
-  { name: 'Wei Chen', employer: 'Stanford Hospital', email: 'wei.chen@email.com' },
-  { name: 'Carmen Vasquez', employer: 'Long Beach City', email: 'cvasquez@email.com' },
-  { name: 'Andre Foster', employer: 'Warehouse Supervisor', email: 'andre.f@email.com' },
-  { name: 'Amara Adeyemi', employer: 'LAUSD', email: 'amara.a@email.com' },
-  { name: 'Diego Torres', employer: 'Farm Laborer', email: 'diego.t@email.com' },
-  { name: 'Sinead O\'Sullivan', employer: 'Nursing Agency', email: 'sinead.os@email.com' },
-  { name: 'Amit Patel', employer: '7-Eleven Franchise Owner', email: 'apatel@email.com' },
-  { name: 'Theresa Coleman', employer: 'Home Depot', email: 't.coleman@email.com' },
-  { name: 'Hiroshi Tanaka', employer: 'Sony Entertainment', email: 'hiroshi.t@email.com' },
-  { name: 'Alicia Pierce', employer: 'Kaiser Call Center', email: 'alicia.p@email.com' },
-  { name: 'Linh Nguyen', employer: 'Nail Salon Owner', email: 'linh.n@email.com' },
-  { name: 'Gloria Bautista', employer: 'Elementary Teacher', email: 'gloria.b@email.com' },
-  { name: 'Kwame Osei', employer: 'UPS', email: 'kwame.osei@email.com' },
-  { name: 'Camila Ramirez', employer: 'Restaurant Server', email: 'camila.r@email.com' },
-  { name: 'Zanele Mbeki', employer: 'Medical Billing', email: 'zanele.m@email.com' },
-  { name: 'Elena Volkov', employer: 'Russian Bakery Owner', email: 'elena.v@email.com' },
+const FIRST_NAMES_F = [
+  'Maria', 'Sofia', 'Linda', 'Sandra', 'Jessica', 'Carmen', 'Patricia', 'Elena',
+  'Veronica', 'Rachel', 'Diana', 'Gabriela', 'Carla', 'Yolanda', 'Priya', 'Gloria',
+  'LaToya', 'Aisha', 'Lupe', 'Esperanza', 'Guadalupe', 'Selena', 'Beatriz', 'Ximena',
+  'Fatima', 'Camila', 'Naomi', 'Rosalind', 'Chanel', 'Amara', 'Sinead',
 ];
 
-const addresses = [
-  '2847 Story Rd, San Jose, CA 95122',
-  '1920 International Blvd, Oakland, CA 94606',
-  '450 Marshall St, Redwood City, CA 94063',
-  '1733 W Vernon Ave, Los Angeles, CA 90062',
-  '2315 N Tustin Ave, Santa Ana, CA 92705',
-  '3902 University Ave, San Diego, CA 92105',
+const LAST_NAMES = [
+  'Garcia', 'Martinez', 'Rodriguez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson',
+  'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez',
+  'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
+  'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill',
+  'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell',
+  'Mitchell', 'Carter', 'Roberts', 'Gomez', 'Phillips', 'Evans', 'Turner', 'Diaz',
+  'Parker', 'Kapoor', 'Patel', 'Singh', 'Whitfield', 'Vasquez', 'Coleman', 'Foster',
+];
+
+const CHARGES = [
+  'Felony DUI, Evasion', 'Possession w/ Intent', 'Assault w/ Deadly Weapon',
+  'Grand Theft Auto', 'Drug Trafficking', 'Burglary, Resisting Arrest',
+  'Embezzlement', 'Felony Weapons', 'Domestic Battery', 'Robbery',
+  'Fraud, Identity Theft', 'Attempted Murder', 'Cybercrime, Wire Fraud',
+  'Felony DUI', 'Possession', 'Gang Enhancement, Assault', 'Manslaughter',
+  'Check Fraud', 'Armed Robbery', 'Money Laundering', 'Felony Evasion, Narcotics',
+  'Extortion', 'Vehicular Homicide', 'Aggravated Assault', 'Felony DUI, Hit & Run',
+  'Narcotics Distribution', 'Organized Crime', 'Human Trafficking',
+];
+
+const ADDRESS_BY_OFFICE: Record<Office, string[]> = {
+  'San Jose': ['2847 Story Rd, San Jose, CA 95122', '1190 Tully Rd, San Jose, CA 95122', '885 N King Rd, San Jose, CA 95133'],
+  'Oakland': ['1920 International Blvd, Oakland, CA 94606', '2715 MacArthur Blvd, Oakland, CA 94602', '3001 Foothill Blvd, Oakland, CA 94601'],
+  'Redwood City': ['450 Marshall St, Redwood City, CA 94063', '1801 Broadway, Redwood City, CA 94063', '925 Veterans Blvd, Redwood City, CA 94063'],
+  'Los Angeles': ['1733 W Vernon Ave, Los Angeles, CA 90062', '4801 S Vermont Ave, Los Angeles, CA 90037', '8821 S Western Ave, Los Angeles, CA 90047'],
+  'Santa Ana': ['2315 N Tustin Ave, Santa Ana, CA 92705', '1801 E 17th St, Santa Ana, CA 92705', '3601 W McFadden Ave, Santa Ana, CA 92704'],
+  'San Diego': ['3902 University Ave, San Diego, CA 92105', '4525 El Cajon Blvd, San Diego, CA 92115', '5102 Imperial Ave, San Diego, CA 92113'],
+};
+
+const EMPLOYERS = [
+  'Valley Memorial Hospital', 'Amazon Fulfillment', 'Self-Employed', 'Kaiser Permanente',
+  'SF Unified School District', 'Tesla', 'Google', 'Restaurant Owner', 'USPS',
+  'Cerritos College', 'Construction Foreman', 'Oakland Parks & Rec', 'Stanford Hospital',
+  'Long Beach City', 'Warehouse Supervisor', 'LAUSD', 'Farm Laborer', 'Nursing Agency',
+  '7-Eleven Franchise Owner', 'Home Depot', 'Sony Entertainment', 'Kaiser Call Center',
+  'Nail Salon Owner', 'Elementary Teacher', 'UPS', 'Restaurant Server', 'Medical Billing',
+];
+
+const NEXT_ACTIONS = [
+  'AI call scheduled 4:15 PM',
+  'SMS sequence — day 3',
+  'Demand letter queued',
+  'Skip trace in progress',
+  'Payment plan review',
+  'Legal escalation pending',
+  'Follow-up call tomorrow',
+  'Court date verification',
+  'Indemnitor capacity model refresh',
+];
+
+const STATUS_BUCKETS: { status: AccountStatus; weight: number }[] = [
+  { status: 'Active',        weight: 35 },
+  { status: 'Delinquent',    weight: 30 },
+  { status: 'Escalated',     weight: 15 },
+  { status: 'Legal',         weight: 10 },
+  { status: 'Payment Plan',  weight: 10 },
 ];
 
 function seededRandom(seed: number) {
-  return function () {
-    seed = (seed * 9301 + 49297) % 233280;
-    return seed / 233280;
+  let s = seed;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
   };
 }
 
-function generatePayments(rand: () => number, count: number) {
-  const payments: Account['payments'] = [];
-  const methods: Array<'ACH' | 'Card' | 'Wire' | 'Check'> = ['ACH', 'Card', 'Wire', 'Check'];
-  const statuses: Array<'Cleared' | 'Pending' | 'Failed'> = ['Cleared', 'Cleared', 'Cleared', 'Failed', 'Pending'];
-  for (let i = 0; i < count; i++) {
-    const daysAgo = Math.floor(rand() * 180) + i * 14;
-    const d = new Date();
-    d.setDate(d.getDate() - daysAgo);
-    payments.push({
-      date: d.toISOString(),
-      amount: Math.floor(rand() * 4500) + 250,
-      method: methods[Math.floor(rand() * methods.length)],
-      status: statuses[Math.floor(rand() * statuses.length)],
-    });
-  }
-  return payments;
+function pick<T>(rand: () => number, arr: readonly T[]): T {
+  return arr[Math.floor(rand() * arr.length)];
 }
 
-function generateComms(rand: () => number, count: number) {
-  const channels: Array<'AI Call' | 'SMS' | 'Email' | 'Letter' | 'Skip Trace'> = ['AI Call', 'SMS', 'Email', 'Letter', 'Skip Trace'];
+function weightedStatus(rand: () => number): AccountStatus {
+  const total = STATUS_BUCKETS.reduce((s, b) => s + b.weight, 0);
+  let r = rand() * total;
+  for (const bucket of STATUS_BUCKETS) {
+    r -= bucket.weight;
+    if (r <= 0) return bucket.status;
+  }
+  return 'Active';
+}
+
+function generatePayments(rand: () => number, status: AccountStatus): Account['payments'] {
+  const count = status === 'Payment Plan' ? 4 + Math.floor(rand() * 4) : 2 + Math.floor(rand() * 4);
+  const methods: Array<'ACH' | 'Card' | 'Wire' | 'Check'> = ['ACH', 'Card', 'Wire', 'Check'];
+  const out: Account['payments'] = [];
+  for (let i = 0; i < count; i++) {
+    const daysAgo = Math.floor(rand() * 30) + i * 21;
+    const d = new Date();
+    d.setDate(d.getDate() - daysAgo);
+    const r = rand();
+    const statusVal: 'Cleared' | 'Pending' | 'Failed' = r < 0.78 ? 'Cleared' : r < 0.9 ? 'Pending' : 'Failed';
+    out.push({
+      date: d.toISOString(),
+      amount: Math.floor(rand() * 2400) + 250,
+      method: methods[Math.floor(rand() * methods.length)],
+      status: statusVal,
+    });
+  }
+  return out;
+}
+
+function generateCommunications(rand: () => number): Account['communications'] {
+  const channels: Array<'AI Call' | 'SMS' | 'Email' | 'Letter' | 'Skip Trace'> =
+    ['AI Call', 'SMS', 'Email', 'Letter', 'Skip Trace'];
   const outcomes = [
     'Left voicemail, promise-to-pay logged',
     'Delivered, opened',
@@ -113,71 +133,92 @@ function generateComms(rand: () => number, count: number) {
     'Refused contact, cease-and-desist threatened',
     'Partial payment received',
     'Updated employer information',
+    'Payment portal clicked',
+    'Balance summary opened',
   ];
-  const comms: Account['communications'] = [];
+  const count = 4 + Math.floor(rand() * 4);
+  const out: Account['communications'] = [];
   for (let i = 0; i < count; i++) {
     const daysAgo = i * 2 + Math.floor(rand() * 3);
     const d = new Date();
     d.setDate(d.getDate() - daysAgo);
-    comms.push({
+    out.push({
       date: d.toISOString(),
       channel: channels[Math.floor(rand() * channels.length)],
       outcome: outcomes[Math.floor(rand() * outcomes.length)],
     });
   }
-  return comms;
+  return out;
 }
 
-export const mockAccounts: Account[] = defendants.map((def, i) => {
-  const rand = seededRandom(i * 97 + 13);
-  const bondAmount = [5000, 10000, 25000, 50000, 100000, 150000, 250000, 500000, 750000, 1000000][Math.floor(rand() * 10)];
-  const amountOwed = Math.floor(bondAmount * (0.05 + rand() * 0.35));
-  const daysPastDue = Math.floor(rand() * 420) + 5;
-  const riskScore = Math.min(100, Math.floor(daysPastDue / 4 + rand() * 30));
-  let status: AccountStatus;
-  if (daysPastDue < 45) status = 'Active';
-  else if (daysPastDue < 90) status = rand() > 0.6 ? 'Payment Plan' : 'Delinquent';
-  else if (daysPastDue < 150) status = 'Delinquent';
-  else if (daysPastDue < 240) status = 'Escalated';
-  else status = 'Legal';
+function generateAccount(idx: number, seed: number): Account {
+  const rand = seededRandom(seed);
+  const office = OFFICES[Math.floor(rand() * OFFICES.length)];
+  const isFemaleIndemnitor = rand() > 0.4;
+  const defFirst = pick(rand, FIRST_NAMES);
+  const defLast = pick(rand, LAST_NAMES);
+  const indFirst = isFemaleIndemnitor ? pick(rand, FIRST_NAMES_F) : pick(rand, FIRST_NAMES);
+  const sameFamily = rand() > 0.55;
+  const indLast = sameFamily ? defLast : pick(rand, LAST_NAMES);
 
-  const office = OFFICES[i % OFFICES.length];
-  const ind = indemnitors[i];
+  const status = weightedStatus(rand);
+  const bondAmount = [10_000, 15_000, 25_000, 35_000, 50_000, 75_000, 100_000, 150_000][Math.floor(rand() * 8)];
+
+  const daysPastDue =
+    status === 'Active' ? Math.floor(rand() * 30)
+    : status === 'Delinquent' ? 31 + Math.floor(rand() * 30)
+    : status === 'Escalated' ? 61 + Math.floor(rand() * 30)
+    : status === 'Legal' ? 121 + Math.floor(rand() * 60)
+    : Math.floor(rand() * 15);
+
+  const riskScore =
+    status === 'Active' ? 10 + Math.floor(rand() * 25)
+    : status === 'Delinquent' ? 40 + Math.floor(rand() * 25)
+    : status === 'Escalated' ? 60 + Math.floor(rand() * 20)
+    : status === 'Legal' ? 85 + Math.floor(rand() * 15)
+    : 20 + Math.floor(rand() * 30);
+
+  const totalOwed = Math.round(bondAmount * 0.08);
+  const recoveredFrac = status === 'Payment Plan'
+    ? 0.2 + rand() * 0.5
+    : status === 'Legal' ? rand() * 0.1
+    : rand() * 0.3;
+  const recovered = Math.round(totalOwed * recoveredFrac);
+  const amountOwed = Math.max(0, totalOwed - recovered);
+
   const lastContactDays = Math.floor(rand() * 14) + 1;
   const lastContact = new Date();
   lastContact.setDate(lastContact.getDate() - lastContactDays);
 
   const bondDate = new Date();
   bondDate.setDate(bondDate.getDate() - daysPastDue - 30);
-  const courtDate = new Date();
-  courtDate.setDate(courtDate.getDate() + Math.floor(rand() * 120) - 60);
 
-  const nextActions = [
-    'AI call scheduled 4:15 PM',
-    'SMS sequence — day 3',
-    'Demand letter queued',
-    'Skip trace in progress',
-    'Payment plan review',
-    'Legal escalation pending',
-    'Follow-up call tomorrow',
-  ];
+  const courtDate = new Date();
+  courtDate.setDate(courtDate.getDate() + Math.floor(rand() * 180) - 30);
+
+  const indemnitorPhone =
+    `(${Math.floor(rand() * 700) + 200}) ${Math.floor(rand() * 800) + 200}-${String(Math.floor(rand() * 9999)).padStart(4, '0')}`;
+
+  const address = pick(rand, ADDRESS_BY_OFFICE[office]);
+
+  const isForfeited = rand() > 0.92;
 
   return {
-    id: `acc-${i + 1}`,
-    bondId: `BB-${2024 + (i % 2)}-${String(1040 + i).padStart(4, '0')}`,
+    id: `gen-${1000 + idx}`,
+    bondId: `BB-2024-${String(2000 + idx).padStart(4, '0')}`,
     defendant: {
-      name: def.name,
-      dob: def.dob,
-      charges: def.charges,
+      name: `${defFirst} ${defLast}`,
+      dob: `19${70 + Math.floor(rand() * 25)}-${String(Math.floor(rand() * 12) + 1).padStart(2, '0')}-${String(Math.floor(rand() * 28) + 1).padStart(2, '0')}`,
+      charges: pick(rand, CHARGES),
       bondDate: bondDate.toISOString(),
-      courtDate: rand() > 0.85 ? 'Forfeited' : courtDate.toISOString(),
+      courtDate: isForfeited ? 'Forfeited' : courtDate.toISOString(),
     },
     indemnitor: {
-      name: ind.name,
-      phone: `(${Math.floor(rand() * 800) + 200}) ${Math.floor(rand() * 800) + 200}-${String(Math.floor(rand() * 9999)).padStart(4, '0')}`,
-      email: ind.email,
-      address: addresses[OFFICES.indexOf(office)],
-      employer: ind.employer,
+      name: `${indFirst} ${indLast}`,
+      phone: indemnitorPhone,
+      email: `${indFirst.toLowerCase()}.${indLast.toLowerCase()}@email.com`,
+      address,
+      employer: pick(rand, EMPLOYERS),
     },
     bondAmount,
     amountOwed,
@@ -186,9 +227,32 @@ export const mockAccounts: Account[] = defendants.map((def, i) => {
     status,
     office,
     lastContact: lastContact.toISOString(),
-    nextAction: nextActions[Math.floor(rand() * nextActions.length)],
-    payments: generatePayments(rand, Math.floor(rand() * 6) + 3),
-    communications: generateComms(rand, Math.floor(rand() * 4) + 4),
+    nextAction: pick(rand, NEXT_ACTIONS),
+    payments: generatePayments(rand, status),
+    communications: generateCommunications(rand),
+    compliance: {
+      accountId: `gen-${1000 + idx}`,
+      doNotContact: rand() < 0.04,
+      legalHold: status === 'Legal' && rand() < 0.5,
+      disputeFlag: rand() < 0.06,
+      ceaseAndDesist: rand() < 0.03,
+      bankruptcyFlag: rand() < 0.03,
+      deceasedFlag: false,
+      wrongPartyFlag: rand() < 0.05,
+      representedByAttorney: status === 'Legal' && rand() < 0.6,
+      preferredContactMethod: rand() < 0.5 ? 'sms' : 'phone',
+      contactWindowStart: '09:00',
+      contactWindowEnd: '18:00',
+      consentSms: rand() > 0.1,
+      consentEmail: rand() > 0.08,
+      consentVoice: rand() > 0.12,
+      lastConsentUpdatedAt: lastContact.toISOString(),
+    },
   };
-});
+}
 
+export function generateMockAccounts(n: number = 42, baseSeed: number = 4127): Account[] {
+  return Array.from({ length: n }, (_, i) => generateAccount(i, baseSeed + i * 97));
+}
+
+export const generatedAccounts: Account[] = generateMockAccounts(42);

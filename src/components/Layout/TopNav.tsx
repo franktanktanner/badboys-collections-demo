@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { cn } from '../../lib/cn';
 import { LOCATIONS, type LocationFilter } from '../../lib/filters';
+import { agencyConfig } from '../../config/agencyConfig';
 
 const DATE_RANGES = ['Last 24 hours', 'Last 7 days', 'Last 30 days', 'Last 90 days', 'Year to date'];
 
@@ -78,13 +79,13 @@ export function TopNav({
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-gold to-brand-golddark font-display text-base font-bold text-slate-950 shadow-glow">
-                BB
+                {agencyConfig.initials}
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-bg-base bg-status-active" />
             </div>
             <div className="hidden sm:block">
-              <div className="font-display text-sm font-semibold tracking-tight text-white">Bad Boys Bail Bonds</div>
-              <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-brand-gold">Collections Command Center</div>
+              <div className="font-display text-sm font-semibold tracking-tight text-white">{agencyConfig.name}</div>
+              <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-brand-gold">{agencyConfig.dashboardTitle}</div>
             </div>
           </div>
         </div>

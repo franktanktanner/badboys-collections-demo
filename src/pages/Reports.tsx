@@ -12,10 +12,18 @@ import { CountUp } from '../components/shared/CountUp';
 import { cn } from '../lib/cn';
 import { formatCurrency, formatNumber, formatPercent } from '../lib/format';
 import {
-  isFiltered, shareOf, OFFICE_STATS, officeStatsList,
+  isFiltered,
   type LocationFilter,
 } from '../lib/filters';
 import type { Office } from '../types';
+import { accountFixtures } from '../data/accountFixtures';
+import {
+  getAccountRecoveredAmount,
+  getOfficeRecoveryStats,
+  getRecoverySnapshot,
+  getScopedAccounts,
+  getTotalReceivables,
+} from '../lib/recoverySelectors';
 
 const DATE_RANGES = ['Last 30 days', 'Last Quarter', 'YTD', 'Custom'] as const;
 type DateRange = (typeof DATE_RANGES)[number];
@@ -28,30 +36,6 @@ const RANGE_MULTIPLIERS: Record<DateRange, number> = {
 };
 
 const MONTH_LABELS = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'];
-const MONTH_BASE = [612, 648, 690, 712, 754, 798, 812, 836, 884, 902, 928, 847];
-
-const TOP_RECOVERED_BASE: { bondId: string; name: string; original: number; recovered: number; days: number; office: Office }[] = [
-  { bondId: 'BB-2024-0891', name: 'Marcus Washington',  original: 48_000, recovered: 48_000, days: 12, office: 'Los Angeles' },
-  { bondId: 'BB-2024-0874', name: 'Elena Rodriguez',    original: 36_500, recovered: 36_500, days: 18, office: 'San Jose' },
-  { bondId: 'BB-2024-0912', name: 'DeShawn Parker',     original: 42_000, recovered: 40_800, days: 24, office: 'Oakland' },
-  { bondId: 'BB-2024-0803', name: 'Priya Nair',         original: 28_900, recovered: 28_900, days: 9,  office: 'San Jose' },
-  { bondId: 'BB-2024-0858', name: 'Tomás Herrera',      original: 55_200, recovered: 52_400, days: 31, office: 'Santa Ana' },
-  { bondId: 'BB-2024-0829', name: 'Kimberly Nguyen',    original: 19_800, recovered: 19_800, days: 6,  office: 'San Diego' },
-  { bondId: 'BB-2024-0844', name: 'Jalen Brooks',       original: 33_750, recovered: 31_200, days: 27, office: 'Los Angeles' },
-  { bondId: 'BB-2024-0887', name: 'Anastasia Volkov',   original: 62_000, recovered: 58_900, days: 38, office: 'Redwood City' },
-  { bondId: 'BB-2024-0901', name: 'Rafael Castillo',    original: 24_400, recovered: 24_400, days: 14, office: 'Santa Ana' },
-  { bondId: 'BB-2024-0862', name: 'Aisha Robinson',     original: 17_200, recovered: 17_200, days: 8,  office: 'Oakland' },
-  { bondId: 'BB-2024-0809', name: 'Diego Fernández',    original: 71_500, recovered: 65_800, days: 44, office: 'Los Angeles' },
-  { bondId: 'BB-2024-0920', name: 'Mei Tanaka',         original: 21_300, recovered: 21_300, days: 11, office: 'San Jose' },
-  { bondId: 'BB-2024-0881', name: 'Cyrus Ahmadi',       original: 38_900, recovered: 36_100, days: 29, office: 'Oakland' },
-  { bondId: 'BB-2024-0867', name: 'Rachel Goldberg',    original: 26_600, recovered: 26_600, days: 16, office: 'San Diego' },
-  { bondId: 'BB-2024-0893', name: 'Oluwaseun Adeyemi',  original: 44_200, recovered: 42_100, days: 22, office: 'Redwood City' },
-  { bondId: 'BB-2024-0812', name: 'Vanessa Kowalski',   original: 15_800, recovered: 15_800, days: 7,  office: 'San Jose' },
-  { bondId: 'BB-2024-0876', name: 'Desmond Jackson',    original: 52_700, recovered: 48_300, days: 34, office: 'Los Angeles' },
-  { bondId: 'BB-2024-0898', name: 'Isla Fitzgerald',    original: 29_400, recovered: 29_400, days: 13, office: 'Santa Ana' },
-  { bondId: 'BB-2024-0834', name: 'Amir Hassan',        original: 31_100, recovered: 28_900, days: 26, office: 'San Diego' },
-  { bondId: 'BB-2024-0904', name: 'Lucia Moretti',      original: 23_500, recovered: 23_500, days: 10, office: 'Oakland' },
-];
 
 const AGE_BUCKETS = [
   { label: '0 to 30 days',   key: '0-30',   share: 0.18, rate: 0.94 },
@@ -61,46 +45,48 @@ const AGE_BUCKETS = [
   { label: '180+ days',      key: '180+',   share: 0.16, rate: 0.11 },
 ];
 
-const TOTAL_OUTSTANDING_YTD = 135_000_000;
-
 export function Reports({ location }: { location: LocationFilter }) {
   const [dateRange, setDateRange] = useState<DateRange>('YTD');
 
   const rangeShare = RANGE_MULTIPLIERS[dateRange];
-  const locShare = shareOf(location);
-  const scope = rangeShare * locShare;
+  const scopedAccounts = useMemo(() => getScopedAccounts(accountFixtures, location), [location]);
+  const snapshot = useMemo(() => getRecoverySnapshot(scopedAccounts), [scopedAccounts]);
+  const scope = rangeShare * (getTotalReceivables(accountFixtures) > 0 ? snapshot.totalReceivables / getTotalReceivables(accountFixtures) : 0);
   const scoped = isFiltered(location);
 
   const kpis = useMemo(() => {
-    const baseRecovered = 9_420_000 * rangeShare * locShare;
-    const baseRate = scoped ? OFFICE_STATS[location as Office].collectionRate : 8.7;
-    const activePlans = Math.max(6, Math.round(734 * locShare));
-    const avgDays = scoped
-      ? 21 + Math.round((OFFICE_STATS[location as Office].trend - 2) * 2)
-      : 23;
+    const activePlans = scopedAccounts.reduce(
+      (total, account) => total + (account.paymentPlans?.filter((plan) => plan.status === 'active').length ?? 0),
+      0,
+    );
     return {
-      recovered: Math.round(baseRecovered),
-      rate: baseRate,
-      avgDays: Math.max(12, avgDays),
+      recovered: Math.round(snapshot.dollarsRecovered * rangeShare),
+      rate: snapshot.collectionRate,
+      avgDays: snapshot.averageDaysToRecovery,
       activePlans,
     };
-  }, [rangeShare, locShare, scoped, location]);
+  }, [rangeShare, scopedAccounts, snapshot]);
 
   const monthlyRecovery = useMemo(
     () => MONTH_LABELS.map((m, i) => ({
       month: m,
-      recovered: Math.round(MONTH_BASE[i] * 1000 * locShare),
+      recovered: scopedAccounts.reduce((total, account) => {
+        const monthTotal = account.payments
+          .filter((payment) => payment.status === 'Cleared' && new Date(payment.date).getMonth() === i)
+          .reduce((paymentTotal, payment) => paymentTotal + payment.amount, 0);
+        return total + monthTotal;
+      }, 0),
     })),
-    [locShare],
+    [scopedAccounts],
   );
 
   const officeCollections = useMemo(
-    () => officeStatsList
-      .map((o) => ({
-        office: o.office,
-        recovered: Math.round(o.totalOwed * (o.collectionRate / 100) * rangeShare),
-        rate: o.collectionRate,
-        isSelected: scoped && location === o.office,
+    () => Object.entries(getOfficeRecoveryStats(accountFixtures))
+      .map(([office, stats]) => ({
+        office,
+        recovered: Math.round(stats.recovered * rangeShare),
+        rate: stats.rate,
+        isSelected: scoped && location === office,
       }))
       .sort((a, b) => b.recovered - a.recovered),
     [rangeShare, scoped, location],
@@ -116,17 +102,28 @@ export function Reports({ location }: { location: LocationFilter }) {
   }, [kpis.recovered]);
 
   const topRecovered = useMemo(() => {
-    const filtered = scoped
-      ? TOP_RECOVERED_BASE.filter((r) => r.office === location)
-      : TOP_RECOVERED_BASE;
-    return filtered.slice(0, 20);
-  }, [scoped, location]);
+    return scopedAccounts
+      .map((account) => ({
+        bondId: account.bondId,
+        name: account.defendant.name,
+        original: account.bondAmount,
+        recovered: getAccountRecoveredAmount(account),
+        days: account.daysPastDue,
+        office: account.office,
+      }))
+      .filter((account) => account.recovered > 0)
+      .sort((a, b) => b.recovered - a.recovered)
+      .slice(0, 20);
+  }, [scopedAccounts]);
 
   const ageBuckets = useMemo(() => {
-    const total = TOTAL_OUTSTANDING_YTD * locShare;
     return AGE_BUCKETS.map((b) => {
-      const outstanding = Math.round(total * b.share);
-      const accounts = Math.max(4, Math.round(outstanding / 31_800));
+      const [min, max] = b.key === '180+'
+        ? [180, Infinity]
+        : b.key.split('-').map(Number);
+      const bucketAccounts = scopedAccounts.filter((account) => account.daysPastDue >= min && account.daysPastDue <= max);
+      const outstanding = bucketAccounts.reduce((sum, account) => sum + account.amountOwed, 0);
+      const accounts = bucketAccounts.length;
       return {
         ...b,
         outstanding,
@@ -134,7 +131,7 @@ export function Reports({ location }: { location: LocationFilter }) {
         rate: b.rate,
       };
     });
-  }, [locShare]);
+  }, [scopedAccounts]);
 
   return (
     <motion.div
