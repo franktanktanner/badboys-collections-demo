@@ -19,8 +19,8 @@ const ICONS: Record<ActivityType, { Icon: typeof Phone; bg: string; text: string
 
 const INITIAL_VISIBLE = 6;
 const MAX_VISIBLE = 12;
-const MIN_DELAY_MS = 8000;
-const MAX_DELAY_MS = 15000;
+const MIN_DELAY_MS = 5000;
+const MAX_DELAY_MS = 10000;
 const REFRESH_INTERVAL_MS = 30000;
 
 export function ActivityFeed({ location }: { location: LocationFilter }) {
@@ -74,17 +74,23 @@ export function ActivityFeed({ location }: { location: LocationFilter }) {
             {isFiltered(location) ? `${location} events` : 'System events across all offices'}
           </p>
         </div>
-        <motion.span
-          className="chip text-slate-300"
-          animate={{ opacity: [0.85, 1, 0.85], scale: [1, 1.02, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping-slow rounded-full bg-status-active opacity-70" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-status-active" />
-          </span>
+        <span className="chip border border-status-active/40 bg-status-active/15 text-slate-100 shadow-[0_0_12px_rgba(34,197,94,0.3)]">
+          <motion.span
+            className="inline-block h-2.5 w-2.5 rounded-full bg-status-active"
+            style={{ boxShadow: '0 0 0 0 rgba(34, 197, 94, 0.7)' }}
+            animate={{
+              scale: [1, 1.6, 1],
+              opacity: [1, 0.4, 1],
+              boxShadow: [
+                '0 0 0 0 rgba(34, 197, 94, 0.7)',
+                '0 0 0 12px rgba(34, 197, 94, 0)',
+                '0 0 0 0 rgba(34, 197, 94, 0)',
+              ],
+            }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeOut' }}
+          />
           Live
-        </motion.span>
+        </span>
       </div>
 
       <div className="mt-5 -mr-2 flex-1 overflow-y-auto pr-2">
