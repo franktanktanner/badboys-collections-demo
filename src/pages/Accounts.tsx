@@ -1,15 +1,21 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
 import { SearchFilters } from '../components/Accounts/SearchFilters';
 import { AccountsTable } from '../components/Accounts/AccountsTable';
 import type { AccountStatus } from '../types';
 import { isFiltered, type LocationFilter } from '../lib/filters';
+import { filterAndSortAccounts } from '../lib/accountFilter';
 
 export function Accounts({ location }: { location: LocationFilter }) {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<AccountStatus | 'All'>('All');
   const [sort, setSort] = useState('Amount Owed');
+
+  const rows = useMemo(
+    () => filterAndSortAccounts({ query, status, sort, location }),
+    [query, status, sort, location],
+  );
 
   return (
     <motion.div
@@ -33,8 +39,9 @@ export function Accounts({ location }: { location: LocationFilter }) {
         query={query} onQuery={setQuery}
         status={status} onStatus={setStatus}
         sort={sort} onSort={setSort}
+        rows={rows}
       />
-      <AccountsTable query={query} status={status} sort={sort} location={location} />
+      <AccountsTable rows={rows} />
     </motion.div>
   );
 }

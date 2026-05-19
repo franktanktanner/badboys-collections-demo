@@ -1,45 +1,20 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { mockAccounts } from '../../data/mockAccounts';
-import type { AccountStatus } from '../../types';
+import type { Account } from '../../types';
 import { formatCurrency, formatDate, relativeTime } from '../../lib/format';
 import { StatusBadge } from '../shared/StatusBadge';
 import { RiskMeter } from '../shared/RiskMeter';
 import { AccountDetail } from './AccountDetail';
 import { cn } from '../../lib/cn';
-import { isFiltered, type LocationFilter } from '../../lib/filters';
 
 interface Props {
-  query: string;
-  status: AccountStatus | 'All';
-  sort: string;
-  location: LocationFilter;
+  rows: Account[];
 }
 
-export function AccountsTable({ query, status, sort, location }: Props) {
+export function AccountsTable({ rows }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null);
-
-  const rows = useMemo(() => {
-    let r = mockAccounts;
-    if (isFiltered(location)) r = r.filter((a) => a.office === location);
-    if (status !== 'All') r = r.filter((a) => a.status === status);
-    if (query) {
-      const q = query.toLowerCase();
-      r = r.filter((a) =>
-        a.defendant.name.toLowerCase().includes(q) ||
-        a.indemnitor.name.toLowerCase().includes(q) ||
-        a.bondId.toLowerCase().includes(q),
-      );
-    }
-    const sorters: Record<string, (a: typeof r[number], b: typeof r[number]) => number> = {
-      'Amount Owed': (a, b) => b.amountOwed - a.amountOwed,
-      'Days Past Due': (a, b) => b.daysPastDue - a.daysPastDue,
-      'Risk Score': (a, b) => b.riskScore - a.riskScore,
-      'Last Contact': (a, b) => new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime(),
-    };
-    return [...r].sort(sorters[sort] || sorters['Amount Owed']);
-  }, [query, status, sort, location]);
 
   return (
     <div className="glass-card overflow-hidden">
