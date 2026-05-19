@@ -63,7 +63,8 @@ export type ActivityType =
   | 'skip_trace'
   | 'escalation'
   | 'payment_plan'
-  | 'legal';
+  | 'legal'
+  | 'compass';
 
 export interface Activity {
   id: string;

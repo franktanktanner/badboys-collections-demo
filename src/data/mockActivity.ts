@@ -1,4 +1,6 @@
-import type { Activity } from '../types';
+import type { Activity, Office } from '../types';
+
+export type ActivityTemplate = Omit<Activity, 'id' | 'timestamp'>;
 
 function ago(mins: number): string {
   const d = new Date();
@@ -50,6 +52,72 @@ export const mockActivity: Activity[] = [
   { id: 'a40', timestamp: ago(377), type: 'sms',          title: 'SMS sequence fired',   description: 'Redwood City office — 28 day-1 reminders',                                 outcome: '6 portal visits',         office: 'Redwood City' },
   { id: 'a41', timestamp: ago(395), type: 'payment',      title: 'Payment received',     description: 'Check from Andre Foster on BB-2024-1069',                                  amount: 1120,  outcome: 'Cleared',                 office: 'Oakland' },
 ];
+
+export const liveActivityPool: ActivityTemplate[] = [
+  // Payments
+  { type: 'payment',      title: 'Payment received',     description: 'Indemnitor Maria Carrillo paid on BB-2024-1043',                amount: 3200,  outcome: 'Cleared',              office: 'San Jose' },
+  { type: 'payment',      title: 'Wire received',        description: 'Hiroshi Tanaka cleared BB-2024-1060 in full',                   amount: 18600, outcome: 'Cleared',              office: 'Oakland' },
+  { type: 'payment',      title: 'ACH posted',           description: 'Sergio Vasquez paid on BB-2025-0212',                            amount: 1450,  outcome: 'Cleared',              office: 'Los Angeles' },
+  { type: 'payment',      title: 'Card payment',         description: 'Linh Nguyen paid on BB-2025-0188',                               amount: 780,   outcome: 'Cleared',              office: 'Redwood City' },
+  { type: 'payment',      title: 'Payment received',     description: 'Indemnitor Joaquin Vargas paid on BB-2024-1071',                amount: 4900,  outcome: 'Cleared',              office: 'Santa Ana' },
+  { type: 'payment',      title: 'Payment received',     description: 'Priya Sharma paid on BB-2025-0204',                              amount: 980,   outcome: 'Cleared',              office: 'Redwood City' },
+  { type: 'payment',      title: 'Wire received',        description: 'Beatriz Salazar cleared BB-2024-1078',                           amount: 8400,  outcome: 'Cleared',              office: 'San Diego' },
+
+  // AI calls
+  { type: 'ai_call',      title: 'AI call completed',    description: 'Reached Gloria Whitfield on BB-2024-1041 — payment plan accepted', outcome: '12-mo plan, $420/mo', office: 'Oakland' },
+  { type: 'ai_call',      title: 'AI call completed',    description: 'Reached Tyrone Jackson on BB-2025-0034 — promise to pay $1,250 Friday', outcome: 'PTP logged',         office: 'San Jose' },
+  { type: 'ai_call',      title: 'AI call completed',    description: 'Sentinel left voicemail for Rajesh Kapoor (BB-2024-1052)',       outcome: 'Voicemail — retry 7 PM', office: 'Redwood City' },
+  { type: 'ai_call',      title: 'AI call completed',    description: 'Reached Marco Russo on BB-2024-1083 — verbal commitment $2,800 Tue', outcome: 'Promise logged',         office: 'Santa Ana' },
+  { type: 'ai_call',      title: 'AI call completed',    description: 'Reached Latoya Jackson on BB-2025-0061 — restructure agreed',   outcome: '18-mo plan accepted',    office: 'Oakland' },
+  { type: 'ai_call',      title: 'AI call completed',    description: 'Reached Connor Walsh on BB-2024-1089 — dispute opened',          outcome: 'Escalated to supervisor', office: 'San Diego' },
+  { type: 'ai_call',      title: 'AI call completed',    description: 'Sentinel reached Sofia Herrera on BB-2025-0142',                 outcome: 'Promise to pay 3 days', office: 'Los Angeles' },
+
+  // SMS
+  { type: 'sms',          title: 'SMS sequence fired',   description: '84 reminders sent across LA delinquent tier',                    outcome: '17 portal clicks',       office: 'Los Angeles' },
+  { type: 'sms',          title: 'SMS sequence fired',   description: 'Day-1 cascade fired to 41 San Diego indemnitors',                outcome: '9 replies inbound',      office: 'San Diego' },
+  { type: 'sms',          title: 'SMS sequence fired',   description: 'Optimal-window blast — 62 messages, San Jose tier',              outcome: '23% response rate',      office: 'San Jose' },
+  { type: 'sms',          title: 'SMS sequence fired',   description: 'Bilingual cascade fired to Santa Ana queue',                     outcome: '31% open rate',          office: 'Santa Ana' },
+  { type: 'sms',          title: 'SMS sequence fired',   description: 'Oakland — 28 day-3 reminders at optimal send window',            outcome: '11 portal clicks',       office: 'Oakland' },
+
+  // Skip trace
+  { type: 'skip_trace',   title: 'Skip trace resolved',  description: 'New phone + employer located for Sergio Vasquez',                outcome: 'Contact restored',       office: 'Los Angeles' },
+  { type: 'skip_trace',   title: 'Skip trace resolved',  description: 'Recovered current address for Latoya Jackson',                   outcome: 'Verified via DMV',       office: 'Oakland' },
+  { type: 'skip_trace',   title: 'Skip trace resolved',  description: 'Sentinel located Fatima Abdullah — new mobile + workplace',      outcome: 'Reactivated',            office: 'Santa Ana' },
+  { type: 'skip_trace',   title: 'Skip trace resolved',  description: 'New employer (Cisco) confirmed for Devon Nakamura',              outcome: 'Employer verified',      office: 'San Jose' },
+  { type: 'skip_trace',   title: 'Skip trace resolved',  description: 'Recovered phone + address for Jamal Bennett',                    outcome: 'Contact restored',       office: 'San Diego' },
+
+  // Escalations
+  { type: 'escalation',   title: 'Account escalated',    description: 'BB-2024-1053 moved Delinquent → Escalated at day 181',           office: 'San Diego' },
+  { type: 'escalation',   title: 'Account escalated',    description: 'BB-2025-0042 moved Escalated → Legal at day 224',                outcome: 'Collateral review triggered', office: 'Los Angeles' },
+  { type: 'escalation',   title: 'Account escalated',    description: 'BB-2024-1067 moved Delinquent → Escalated at day 168',           office: 'Santa Ana' },
+  { type: 'escalation',   title: 'Account escalated',    description: 'BB-2025-0117 moved Active → Delinquent at day 32',               office: 'Oakland' },
+
+  // Email opened
+  { type: 'email',        title: 'Email opened',         description: 'Camila Ramirez opened payment plan offer on BB-2025-0098',       outcome: 'Opened · 4 min dwell',   office: 'San Jose' },
+  { type: 'email',        title: 'Email opened',         description: 'Diego Mendoza opened legal notice on BB-2024-1093',              outcome: 'Opened twice · replied', office: 'Los Angeles' },
+  { type: 'email',        title: 'Email opened',         description: 'Beatriz Salazar opened final demand on BB-2024-1078',            outcome: 'Opened · clicked portal', office: 'San Diego' },
+  { type: 'email',        title: 'Email opened',         description: 'Amit Patel opened restructure offer on BB-2025-0204',            outcome: 'Opened · no reply',      office: 'Redwood City' },
+
+  // Payment plans
+  { type: 'payment_plan', title: 'Payment plan signed',  description: 'Wei Chen signed 24-month plan on BB-2024-1052',                  outcome: '$890/mo',                office: 'Redwood City' },
+  { type: 'payment_plan', title: 'Payment plan signed',  description: 'Carmen Vasquez signed 9-month plan on BB-2024-1045',             outcome: '$540/mo',                office: 'Los Angeles' },
+  { type: 'payment_plan', title: 'Payment plan signed',  description: 'Denise Brooks signed 15-month plan on BB-2025-0061',             outcome: '$325/mo',                office: 'San Jose' },
+  { type: 'payment_plan', title: 'Payment plan signed',  description: 'Fatima Abdullah signed 18-month restructure on BB-2024-1050',    outcome: '$380/mo',                office: 'Santa Ana' },
+
+  // Court signals + legal flags
+  { type: 'legal',        title: 'Court signal',         description: 'Forfeiture risk detected on BB-2024-1058',                       outcome: 'LA Superior Court',      office: 'Los Angeles' },
+  { type: 'legal',        title: 'Sentinel flag',        description: 'Patrick O\u2019Neill flagged for legal review on BB-2024-1099',  outcome: 'Day 246 past due',       office: 'San Diego' },
+  { type: 'legal',        title: 'Demand letter queued', description: 'BB-2024-1059 counsel review pending (day 242)',                  outcome: 'Counsel review pending', office: 'San Diego' },
+  { type: 'legal',        title: 'Sentinel flag',        description: 'Andre Foster flagged for legal review on BB-2025-0083',          outcome: 'Day 198 past due',       office: 'Oakland' },
+
+  // Compass partnership outreach
+  { type: 'compass',      title: 'Compass outreach',     description: 'Attorney Daniel Cho responded to Q2 partnership outreach',       outcome: 'Cho & Associates · 12 bonds/mo', office: 'Los Angeles' },
+  { type: 'compass',      title: 'Compass outreach',     description: 'Erica Romano replied — interested in volume pricing',             outcome: 'Romano Legal Group · demo pending', office: 'Santa Ana' },
+  { type: 'compass',      title: 'Compass outreach',     description: 'James Patel signed partnership agreement',                       outcome: 'Patel Defense · effective immediately', office: 'San Diego' },
+  { type: 'compass',      title: 'Compass outreach',     description: 'Lisa Ortiz scheduled discovery call for Friday',                  outcome: 'Ortiz Law Office · 2 PM PT', office: 'Oakland' },
+];
+
+export const OFFICES: Office[] = ['San Jose', 'Oakland', 'Redwood City', 'Los Angeles', 'Santa Ana', 'San Diego'];
 
 export const kpiTrend = Array.from({ length: 30 }, (_, i) => ({
   day: i,
