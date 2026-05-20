@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { Phone, MessageSquare, Mail, CalendarClock, AlertTriangle, Search, User, Shield, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Phone, MessageSquare, Mail, CalendarClock, AlertTriangle, Search, User, Shield, ChevronRight } from 'lucide-react';
 import type { Account } from '../../types';
 import { formatCurrency, formatDate, relativeTime } from '../../lib/format';
 
-export function AccountDetail({ account }: { account: Account }) {
+export function AccountDetail({ account, onBackToList }: { account: Account; onBackToList?: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
@@ -13,6 +13,25 @@ export function AccountDetail({ account }: { account: Account }) {
       className="overflow-hidden"
     >
       <div className="border-b border-border bg-bg-base/60 p-5 lg:p-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          {onBackToList ? (
+            <button
+              onClick={onBackToList}
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 transition-colors hover:text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to list
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="text-right">
+            <div className="label text-brand-goldlight">Viewing Account</div>
+            <div className="mt-0.5 text-sm font-semibold text-white">
+              {account.defendant.name} <span className="font-mono text-xs text-slate-500">· {account.bondId}</span>
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
           {/* Defendant + Indemnitor */}
           <div className="space-y-4 lg:col-span-4">

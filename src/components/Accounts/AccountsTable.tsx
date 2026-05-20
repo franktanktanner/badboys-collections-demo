@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { mockAccounts } from '../../data/mockAccounts';
 import type { Account } from '../../types';
 import { formatCurrency, formatDate, relativeTime } from '../../lib/format';
@@ -15,9 +15,28 @@ interface Props {
 
 export function AccountsTable({ rows }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const tableTopRef = useRef<HTMLDivElement>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
+
+  function handleRowClick(id: string) {
+    const wasOpen = expanded === id;
+    setExpanded(wasOpen ? null : id);
+    if (!wasOpen) {
+      window.setTimeout(() => {
+        detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+    }
+  }
+
+  function handleBackToList() {
+    setExpanded(null);
+    window.setTimeout(() => {
+      tableTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
 
   return (
-    <div className="glass-card overflow-hidden">
+    <div ref={tableTopRef} data-accounts-table className="glass-card overflow-hidden scroll-mt-24">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-bg-surface/90 backdrop-blur">
@@ -46,10 +65,12 @@ export function AccountsTable({ rows }: Props) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, delay: Math.min(i * 0.015, 0.3) }}
                   className={cn(
-                    'border-b border-border-subtle cursor-pointer transition-colors',
-                    isOpen ? 'bg-bg-elevated/60' : 'hover:bg-bg-elevated/40',
+                    'cursor-pointer border-b border-border-subtle transition-colors',
+                    isOpen
+                      ? 'border-l-2 border-l-brand-gold bg-brand-gold/10'
+                      : 'hover:bg-bg-elevated/40',
                   )}
-                  onClick={() => setExpanded(isOpen ? null : a.id)}
+                  onClick={() => handleRowClick(a.id)}
                 >
                   <td className="px-3 py-3">
                     <ChevronDown className={cn('h-3.5 w-3.5 text-slate-500 transition-transform', isOpen && 'rotate-180 text-brand-gold')} />
@@ -86,16 +107,18 @@ export function AccountsTable({ rows }: Props) {
         </table>
       </div>
 
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <div key={expanded}>
-            {(() => {
-              const acct = rows.find((r) => r.id === expanded);
-              return acct ? <AccountDetail account={acct} /> : null;
-            })()}
-          </div>
-        )}
-      </AnimatePresence>
+      <div ref={detailRef} className="scroll-mt-24">
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <div key={expanded}>
+              {(() => {
+                const acct = rows.find((r) => r.id === expanded);
+                return acct ? <AccountDetail account={acct} onBackToList={handleBackToList} /> : null;
+              })()}
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
 
       <div className="flex items-center justify-between border-t border-border px-4 py-3 text-xs text-slate-500">
         <span>Showing <span className="text-slate-300">{rows.length}</span> of {mockAccounts.length} accounts</span>
