@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Users, Bot, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, Bot, BarChart3, Scale } from 'lucide-react';
 import { cn } from '../../lib/cn';
 
-export type TabKey = 'command' | 'accounts' | 'automation' | 'reports';
+export type TabKey = 'command' | 'accounts' | 'automation' | 'pipeline' | 'reports';
 
 const TABS: { key: TabKey; label: string; icon: typeof LayoutDashboard }[] = [
   { key: 'command', label: 'Command Center', icon: LayoutDashboard },
   { key: 'accounts', label: 'Accounts', icon: Users },
   { key: 'automation', label: 'AI Automation', icon: Bot },
+  { key: 'pipeline', label: 'Attorney Pipeline', icon: Scale },
   { key: 'reports', label: 'Reports', icon: BarChart3 },
 ];
 
