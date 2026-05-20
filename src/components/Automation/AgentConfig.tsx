@@ -4,13 +4,13 @@ import { Phone, MessageSquare, Mail, Search, Gavel, CalendarClock, Building2, Ch
 import { cn } from '../../lib/cn';
 
 const features = [
-  { key: 'calls',  Icon: Phone,         title: 'AI Voice Calls',     desc: 'AI agent calls indemnitors with payment reminders, negotiates payment plans, confirms contact info, and logs call outcomes automatically.', stat: '4,284 calls / 30d' },
-  { key: 'sms',    Icon: MessageSquare, title: 'SMS Sequences',      desc: 'Multi-step text campaigns with payment portal links. Urgency escalates based on days past due. Auto-sends at optimal times.',                stat: '94,281 SMS / 30d' },
-  { key: 'email',  Icon: Mail,          title: 'Email Nurture',      desc: 'Automated email sequences with balance summaries, payment links, legal notices. Tracks opens and clicks.',                                     stat: '41% open rate' },
-  { key: 'skip',   Icon: Search,        title: 'Skip Tracing',       desc: 'Auto-triggers skip trace when contact info goes stale or calls/texts bounce. Pulls new phone, address, and employment data.',                stat: '68% restore rate' },
-  { key: 'legal',  Icon: Gavel,         title: 'Legal Escalation',   desc: 'Auto-generates demand letters when accounts exceed configurable thresholds. Queues for legal review before sending.',                        stat: '214 letters queued' },
-  { key: 'plan',   Icon: CalendarClock, title: 'Payment Plan AI',    desc: 'Analyzes indemnitor payment history and estimates capacity. Proposes optimized payment plans with highest likelihood of completion.',        stat: '83% completion' },
-  { key: 'court',  Icon: Building2,     title: 'Courthouse Data Sync', desc: 'Pulls public court records to track case status, sentencing, and warrant information automatically.',                                      stat: '6 counties synced' },
+  { key: 'calls',  agent: 'AVA',      Icon: Phone,         title: 'AI Voice Calls',     desc: 'AI agent calls indemnitors with payment reminders, negotiates payment plans, confirms contact info, and logs call outcomes automatically.', stat: '4,284 calls / 30d' },
+  { key: 'sms',    agent: 'ECHO',     Icon: MessageSquare, title: 'SMS Sequences',      desc: 'Multi-step text campaigns with payment portal links. Urgency escalates based on days past due. Auto-sends at optimal times.',                stat: '94,281 SMS / 30d' },
+  { key: 'email',  agent: 'NOVA',     Icon: Mail,          title: 'Email Nurture',      desc: 'Automated email sequences with balance summaries, payment links, legal notices. Tracks opens and clicks.',                                     stat: '41% open rate' },
+  { key: 'skip',   agent: 'SCOUT',    Icon: Search,        title: 'Skip Tracing',       desc: 'Auto-triggers skip trace when contact info goes stale or calls/texts bounce. Pulls new phone, address, and employment data.',                stat: '68% restore rate' },
+  { key: 'legal',  agent: 'SENTINEL', Icon: Gavel,         title: 'Legal Escalation',   desc: 'Auto-generates demand letters when accounts exceed configurable thresholds. Queues for legal review before sending.',                        stat: '214 letters queued' },
+  { key: 'plan',   agent: 'COMPASS',  Icon: CalendarClock, title: 'Payment Plan AI',    desc: 'Analyzes indemnitor payment history and estimates capacity. Proposes optimized payment plans with highest likelihood of completion.',        stat: '83% completion' },
+  { key: 'court',  agent: 'SCRIBE',   Icon: Building2,     title: 'Courthouse Data Sync', desc: 'Pulls public court records to track case status, sentencing, and warrant information automatically.',                                      stat: '6 counties synced' },
 ];
 
 export function AgentConfig() {
@@ -22,8 +22,8 @@ export function AgentConfig() {
     <div className="glass-card p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="h-display text-lg">AI Agent Configuration</h2>
-          <p className="mt-0.5 text-xs text-slate-400">Toggle automation features across your fleet</p>
+          <h2 className="h-display text-lg">Your AI Agent Workforce</h2>
+          <p className="mt-0.5 text-xs text-slate-400">Seven AI agents working 24/7 across collections operations</p>
         </div>
         <span className="chip text-status-active">
           <Check className="h-3 w-3" />
@@ -45,6 +45,25 @@ export function AgentConfig() {
                 on ? 'border-brand-gold/25 bg-brand-gold/[0.04]' : 'border-border bg-bg-elevated/40',
               )}
             >
+              <div className="mb-3 flex items-center gap-2">
+                <div
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+                  style={{ backgroundColor: '#7A1F1F' }}
+                >
+                  <span
+                    className="font-mono font-bold"
+                    style={{ color: '#D4A853', fontSize: '12px' }}
+                  >
+                    {f.agent.charAt(0)}
+                  </span>
+                </div>
+                <span
+                  className="font-mono"
+                  style={{ color: '#D4A853', fontSize: '12px', letterSpacing: '1.5px' }}
+                >
+                  {f.agent}
+                </span>
+              </div>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <div className={cn(
