@@ -1,15 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowUpRight, Scale, Mail, MailCheck, Sparkles, Flame, Building2,
   Database, Gavel, FileSearch, Loader2, ChevronRight, Handshake,
-  Search, X, MapPin, Plus, Send,
+  Search, X, MapPin, Plus, Send, Check,
 } from 'lucide-react';
 import { CountUp } from '../components/shared/CountUp';
 import { MiniSparkline } from '../components/shared/MiniChart';
 import { cn } from '../lib/cn';
+import { useToast } from '../components/ui/toast-context';
+import {
+  ViewThreadModal, MarkHotModal, SendFollowUpModal,
+} from '../components/AttorneyPipeline/ActionModal';
 
-type PipelineStage = 'New Lead' | 'Outreach Sent' | 'Engaged' | 'Warm Response' | 'Active Partner';
+type PipelineStage = 'New Lead' | 'Outreach Sent' | 'Engaged' | 'Warm Response' | 'Hot Lead' | 'Active Partner';
 
 interface AttorneyRow {
   id: string;
@@ -52,6 +56,7 @@ const STAGE_TO_FILTER: Record<PipelineStage, FilterKey> = {
   'Outreach Sent':  'engaged',
   'Engaged':        'engaged',
   'Warm Response':  'warm',
+  'Hot Lead':       'warm',
   'Active Partner': 'converted',
 };
 
@@ -60,6 +65,7 @@ const STAGE_STYLES: Record<PipelineStage, { dot: string; bg: string; text: strin
   'Outreach Sent':  { dot: 'bg-status-plan',       bg: 'bg-status-plan/10',       text: 'text-status-plan',       border: 'border-status-plan/25' },
   'Engaged':        { dot: 'bg-fuchsia-400',       bg: 'bg-fuchsia-500/10',       text: 'text-fuchsia-300',       border: 'border-fuchsia-500/25' },
   'Warm Response':  { dot: 'bg-brand-gold',        bg: 'bg-brand-gold/10',        text: 'text-brand-goldlight',   border: 'border-brand-gold/30' },
+  'Hot Lead':       { dot: 'bg-brand-red',         bg: 'bg-brand-red/15',         text: 'text-brand-goldlight',   border: 'border-brand-red/40' },
   'Active Partner': { dot: 'bg-status-active',     bg: 'bg-status-active/10',     text: 'text-status-active',     border: 'border-status-active/25' },
 };
 
@@ -209,13 +215,142 @@ const KPI_TREND_OUTREACH  = [{ value: 6400 },  { value: 7100 },  { value: 7620 }
 const KPI_TREND_ACTIVE    = [{ value: 17 },    { value: 18 },    { value: 19 },    { value: 20 },    { value: 21 },    { value: 22 },    { value: 23 }];
 const KPI_TREND_HIGHVALUE = [{ value: 54 },    { value: 61 },    { value: 66 },    { value: 70 },    { value: 75 },    { value: 79 },    { value: 84 }];
 
+type ModalState = { kind: 'thread' | 'hot' | 'follow_up'; rowId: string } | null;
+
 export function AttorneyPipeline() {
+  const { showToast } = useToast();
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [pipelineEntries, setPipelineEntries] = useState<AttorneyRow[]>(ATTORNEYS);
+  const [indexedCount, setIndexedCount] = useState(14_847);
+  const [addedAttorneyIds, setAddedAttorneyIds] = useState<Set<string>>(new Set());
+  const [recentlyAddedIds, setRecentlyAddedIds] = useState<Set<string>>(new Set());
+  const [highlightedRowIds, setHighlightedRowIds] = useState<Set<string>>(new Set());
+  const [outreachSentIds, setOutreachSentIds] = useState<Set<string>>(new Set());
+  const [modal, setModal] = useState<ModalState>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(
-    () => filter === 'all' ? ATTORNEYS : ATTORNEYS.filter((a) => STAGE_TO_FILTER[a.stage] === filter),
-    [filter],
+    () => filter === 'all' ? pipelineEntries : pipelineEntries.filter((a) => STAGE_TO_FILTER[a.stage] === filter),
+    [filter, pipelineEntries],
   );
+
+  const highlightRow = useCallback((rowId: string) => {
+    setHighlightedRowIds((prev) => new Set(prev).add(rowId));
+    window.setTimeout(() => {
+      setHighlightedRowIds((prev) => {
+        const next = new Set(prev);
+        next.delete(rowId);
+        return next;
+      });
+    }, 1500);
+  }, []);
+
+  const handleAddToPipeline = useCallback((att: IndexedAttorney) => {
+    if (addedAttorneyIds.has(att.id) || outreachSentIds.has(att.id)) return;
+
+    if (att.stage === 'Active Partner') {
+      // "Send Outreach" path
+      setOutreachSentIds((prev) => new Set(prev).add(att.id));
+      setRecentlyAddedIds((prev) => new Set(prev).add(att.id));
+      window.setTimeout(() => {
+        setRecentlyAddedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(att.id);
+          return next;
+        });
+      }, 2000);
+      showToast(`Outreach queued to ${att.name} · Compass drafting now`, 'success');
+      return;
+    }
+
+    const newRow: AttorneyRow = {
+      id: `added-${att.id}`,
+      name: att.name,
+      firm: att.firm,
+      county: att.city,
+      stage: 'New Lead',
+      lastTouch: 'just now',
+      action: 'Open Brief',
+    };
+
+    setPipelineEntries((prev) => [newRow, ...prev]);
+    setIndexedCount((prev) => prev + 1);
+    setAddedAttorneyIds((prev) => new Set(prev).add(att.id));
+    setRecentlyAddedIds((prev) => new Set(prev).add(att.id));
+
+    window.setTimeout(() => {
+      setRecentlyAddedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(att.id);
+        return next;
+      });
+    }, 2000);
+
+    highlightRow(newRow.id);
+    showToast(`${att.name} added to pipeline · Compass briefing queued`, 'success');
+
+    window.setTimeout(() => {
+      tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  }, [addedAttorneyIds, outreachSentIds, highlightRow, showToast]);
+
+  const handleRowAction = useCallback((row: AttorneyRow) => {
+    switch (row.action) {
+      case 'View Thread':
+        setModal({ kind: 'thread', rowId: row.id });
+        break;
+      case 'Mark Hot':
+        setModal({ kind: 'hot', rowId: row.id });
+        break;
+      case 'Send Follow-Up':
+        setModal({ kind: 'follow_up', rowId: row.id });
+        break;
+      case 'Open Brief':
+        setModal({ kind: 'follow_up', rowId: row.id });
+        break;
+    }
+  }, []);
+
+  const modalRow = useMemo(
+    () => modal ? pipelineEntries.find((r) => r.id === modal.rowId) ?? null : null,
+    [modal, pipelineEntries],
+  );
+
+  const closeModal = useCallback(() => setModal(null), []);
+
+  const handleConfirmHot = useCallback(() => {
+    if (!modalRow) return;
+    setPipelineEntries((prev) =>
+      prev.map((r) =>
+        r.id === modalRow.id
+          ? { ...r, stage: 'Hot Lead', lastTouch: 'just now', action: 'View Thread' }
+          : r,
+      ),
+    );
+    highlightRow(modalRow.id);
+    showToast(`${modalRow.name} flagged as Hot · Compass cadence updated`, 'success');
+    closeModal();
+  }, [modalRow, highlightRow, showToast, closeModal]);
+
+  const handleReplyViaCompass = useCallback(() => {
+    if (!modalRow) return;
+    showToast('Compass drafting reply...', 'info');
+    closeModal();
+  }, [modalRow, showToast, closeModal]);
+
+  const handleFollowUpSent = useCallback(() => {
+    if (!modalRow) return;
+    setPipelineEntries((prev) =>
+      prev.map((r) =>
+        r.id === modalRow.id
+          ? { ...r, lastTouch: 'just now' }
+          : r,
+      ),
+    );
+    highlightRow(modalRow.id);
+    showToast('Follow-up sent · logged to attorney thread', 'success');
+    closeModal();
+  }, [modalRow, highlightRow, showToast, closeModal]);
 
   return (
     <motion.div
@@ -240,7 +375,7 @@ export function AttorneyPipeline() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <PipelineKpiCard
           label="Attorneys Indexed"
-          value={14847}
+          value={indexedCount}
           sub="across 58 CA counties"
           trendText="+247 this week"
           trendTone="green"
@@ -280,11 +415,22 @@ export function AttorneyPipeline() {
         />
       </div>
 
-      <CitySearchSection />
+      <CitySearchSection
+        addedIds={addedAttorneyIds}
+        recentlyAddedIds={recentlyAddedIds}
+        outreachSentIds={outreachSentIds}
+        onAdd={handleAddToPipeline}
+      />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
+      <div ref={tableRef} className="grid grid-cols-1 gap-4 xl:grid-cols-5">
         <div className="xl:col-span-3">
-          <PipelineTable rows={filtered} filter={filter} onFilter={setFilter} />
+          <PipelineTable
+            rows={filtered}
+            filter={filter}
+            onFilter={setFilter}
+            highlightedRowIds={highlightedRowIds}
+            onRowAction={handleRowAction}
+          />
         </div>
         <div className="space-y-4 xl:col-span-2">
           <CompassActivityCard />
@@ -293,11 +439,47 @@ export function AttorneyPipeline() {
       </div>
 
       <PartnershipWinsCard wins={PARTNERSHIP_WINS} />
+
+      {modalRow && (
+        <>
+          <ViewThreadModal
+            isOpen={modal?.kind === 'thread'}
+            attorneyName={modalRow.name}
+            attorneyFirm={modalRow.firm}
+            attorneyCounty={modalRow.county}
+            onClose={closeModal}
+            onReply={handleReplyViaCompass}
+          />
+          <MarkHotModal
+            isOpen={modal?.kind === 'hot'}
+            attorneyName={modalRow.name}
+            attorneyFirm={modalRow.firm}
+            attorneyCounty={modalRow.county}
+            onClose={closeModal}
+            onConfirm={handleConfirmHot}
+          />
+          <SendFollowUpModal
+            isOpen={modal?.kind === 'follow_up'}
+            attorneyName={modalRow.name}
+            attorneyFirm={modalRow.firm}
+            attorneyCounty={modalRow.county}
+            onClose={closeModal}
+            onSent={handleFollowUpSent}
+          />
+        </>
+      )}
     </motion.div>
   );
 }
 
-function CitySearchSection() {
+interface CitySearchProps {
+  addedIds: Set<string>;
+  recentlyAddedIds: Set<string>;
+  outreachSentIds: Set<string>;
+  onAdd: (att: IndexedAttorney) => void;
+}
+
+function CitySearchSection({ addedIds, recentlyAddedIds, outreachSentIds, onAdd }: CitySearchProps) {
   const [query, setQuery] = useState('');
   const [debounced, setDebounced] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -444,7 +626,14 @@ function CitySearchSection() {
             ) : (
               <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {visibleResults.map((att, i) => (
-                  <SearchResultCard key={att.id} attorney={att} index={i} />
+                  <SearchResultCard
+                    key={att.id}
+                    attorney={att}
+                    index={i}
+                    isAdded={addedIds.has(att.id) || outreachSentIds.has(att.id)}
+                    isRecentlyAdded={recentlyAddedIds.has(att.id)}
+                    onAdd={() => onAdd(att)}
+                  />
                 ))}
               </div>
             )}
@@ -455,16 +644,40 @@ function CitySearchSection() {
   );
 }
 
-function SearchResultCard({ attorney, index }: { attorney: IndexedAttorney; index: number }) {
+function SearchResultCard({
+  attorney,
+  index,
+  isAdded,
+  isRecentlyAdded,
+  onAdd,
+}: {
+  attorney: IndexedAttorney;
+  index: number;
+  isAdded: boolean;
+  isRecentlyAdded: boolean;
+  onAdd: () => void;
+}) {
   const stage = STAGE_STYLES[attorney.stage];
   const isConverted = attorney.stage === 'Active Partner';
+  const confirmedLabel = isConverted ? 'Outreach sent' : 'Added to pipeline';
+  const restingLabel = isConverted ? 'Outreach Sent' : 'In Pipeline';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: Math.min(index * 0.025, 0.25) }}
-      className="group relative overflow-hidden rounded-xl border border-border bg-bg-elevated/40 p-4 transition-all hover:border-brand-gold/30 hover:bg-bg-elevated/70"
+      animate={{
+        opacity: 1,
+        y: 0,
+        backgroundColor: isRecentlyAdded ? 'rgba(34,197,94,0.10)' : 'rgba(17,26,46,0.40)',
+        borderColor: isRecentlyAdded ? 'rgba(34,197,94,0.45)' : 'rgba(148,163,184,0.14)',
+      }}
+      transition={{
+        opacity: { duration: 0.3, delay: Math.min(index * 0.025, 0.25) },
+        y:       { duration: 0.3, delay: Math.min(index * 0.025, 0.25) },
+        backgroundColor: { duration: 0.4 },
+        borderColor:     { duration: 0.4 },
+      }}
+      className="group relative overflow-hidden rounded-xl border p-4 transition-all"
     >
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-gold/30 bg-brand-gold/10 text-sm font-semibold text-brand-goldlight">
@@ -497,10 +710,43 @@ function SearchResultCard({ attorney, index }: { attorney: IndexedAttorney; inde
 
       <div className="mt-3 flex items-center justify-between border-t border-border-subtle pt-3">
         <span className="font-mono text-[10px] text-slate-500">via Compass · State Bar</span>
-        <button className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-border bg-bg-surface/80 px-2.5 py-1 text-[11px] font-medium text-brand-goldlight transition-all hover:border-brand-gold/40 hover:bg-brand-gold/10">
-          {isConverted ? <Send className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
-          {isConverted ? 'Send Outreach' : 'Add to Pipeline'}
-        </button>
+        <AnimatePresence mode="wait" initial={false}>
+          {isRecentlyAdded ? (
+            <motion.div
+              key="confirmed"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.2 }}
+              className="inline-flex items-center gap-1 rounded-md border border-status-active/40 bg-status-active/10 px-2.5 py-1 text-[11px] font-medium text-status-active"
+            >
+              <Check className="h-3 w-3" />
+              {confirmedLabel}
+            </motion.div>
+          ) : isAdded ? (
+            <motion.button
+              key="added"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              disabled
+              className="inline-flex cursor-not-allowed items-center gap-1 rounded-md border border-border bg-bg-surface/40 px-2.5 py-1 text-[11px] font-medium text-status-active/70"
+            >
+              <Check className="h-3 w-3" />
+              {restingLabel}
+            </motion.button>
+          ) : (
+            <motion.button
+              key="add"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={onAdd}
+              className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-border bg-bg-surface/80 px-2.5 py-1 text-[11px] font-medium text-brand-goldlight transition-all hover:border-brand-gold/40 hover:bg-brand-gold/10"
+            >
+              {isConverted ? <Send className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+              {isConverted ? 'Send Outreach' : 'Add to Pipeline'}
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
@@ -572,10 +818,14 @@ function PipelineTable({
   rows,
   filter,
   onFilter,
+  highlightedRowIds,
+  onRowAction,
 }: {
   rows: AttorneyRow[];
   filter: FilterKey;
   onFilter: (k: FilterKey) => void;
+  highlightedRowIds: Set<string>;
+  onRowAction: (row: AttorneyRow) => void;
 }) {
   return (
     <div className="glass-card overflow-hidden">
@@ -623,47 +873,72 @@ function PipelineTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, i) => {
-              const stage = STAGE_STYLES[row.stage];
-              return (
-                <motion.tr
-                  key={row.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.22, delay: Math.min(i * 0.015, 0.25) }}
-                  className="border-b border-border-subtle hover:bg-bg-elevated/40"
-                >
-                  <Td>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-bg-elevated/60 text-[11px] font-semibold text-slate-300">
-                        {initials(row.name)}
+            <AnimatePresence initial={false}>
+              {rows.map((row, i) => {
+                const stage = STAGE_STYLES[row.stage];
+                const isHighlighted = highlightedRowIds.has(row.id);
+                return (
+                  <motion.tr
+                    key={row.id}
+                    layout
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      backgroundColor: isHighlighted ? 'rgba(234,179,8,0.10)' : 'rgba(0,0,0,0)',
+                      boxShadow: isHighlighted ? 'inset 0 0 0 1px rgba(234,179,8,0.45)' : 'inset 0 0 0 1px rgba(0,0,0,0)',
+                    }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      opacity: { duration: 0.22, delay: Math.min(i * 0.015, 0.25) },
+                      y:       { duration: 0.22, delay: Math.min(i * 0.015, 0.25) },
+                      backgroundColor: { duration: 1.4, ease: 'easeOut' },
+                      boxShadow:       { duration: 1.4, ease: 'easeOut' },
+                      layout: { duration: 0.3, ease: 'easeOut' },
+                    }}
+                    className="border-b border-border-subtle hover:bg-bg-elevated/40"
+                  >
+                    <Td>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-bg-elevated/60 text-[11px] font-semibold text-slate-300">
+                          {initials(row.name)}
+                        </div>
+                        <span className="font-medium text-white">{row.name}</span>
                       </div>
-                      <span className="font-medium text-white">{row.name}</span>
-                    </div>
-                  </Td>
-                  <Td>
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <Building2 className="h-3.5 w-3.5 text-slate-500" />
-                      {row.firm}
-                    </div>
-                  </Td>
-                  <Td><span className="text-slate-400">{row.county}</span></Td>
-                  <Td>
-                    <span className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium', stage.bg, stage.text, stage.border)}>
-                      <span className={cn('h-1.5 w-1.5 rounded-full', stage.dot)} />
-                      {row.stage}
-                    </span>
-                  </Td>
-                  <Td><span className="font-mono text-xs text-slate-400">{row.lastTouch}</span></Td>
-                  <Td right>
-                    <button className="group inline-flex items-center gap-1 text-xs font-medium text-brand-goldlight transition-colors hover:text-brand-gold">
-                      {row.action}
-                      <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </button>
-                  </Td>
-                </motion.tr>
-              );
-            })}
+                    </Td>
+                    <Td>
+                      <div className="flex items-center gap-2 text-slate-300">
+                        <Building2 className="h-3.5 w-3.5 text-slate-500" />
+                        {row.firm}
+                      </div>
+                    </Td>
+                    <Td><span className="text-slate-400">{row.county}</span></Td>
+                    <Td>
+                      <motion.span
+                        key={row.stage}
+                        initial={{ opacity: 0, scale: 0.92 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium', stage.bg, stage.text, stage.border)}
+                      >
+                        <span className={cn('h-1.5 w-1.5 rounded-full', stage.dot)} />
+                        {row.stage}
+                      </motion.span>
+                    </Td>
+                    <Td><span className="font-mono text-xs text-slate-400">{row.lastTouch}</span></Td>
+                    <Td right>
+                      <button
+                        onClick={() => onRowAction(row)}
+                        className="group inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-brand-goldlight transition-colors hover:text-brand-gold"
+                      >
+                        {row.action}
+                        <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </button>
+                    </Td>
+                  </motion.tr>
+                );
+              })}
+            </AnimatePresence>
             {rows.length === 0 && (
               <tr>
                 <td colSpan={6} className="p-10 text-center text-sm text-slate-500">
