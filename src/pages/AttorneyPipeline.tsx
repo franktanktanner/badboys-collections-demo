@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowUpRight, Scale, Mail, MailCheck, Sparkles, Flame, Building2,
   Database, Gavel, FileSearch, Loader2, ChevronRight, Handshake,
+  Search, X, MapPin, Plus, Send,
 } from 'lucide-react';
 import { CountUp } from '../components/shared/CountUp';
 import { MiniSparkline } from '../components/shared/MiniChart';
@@ -61,6 +62,105 @@ const STAGE_STYLES: Record<PipelineStage, { dot: string; bg: string; text: strin
   'Warm Response':  { dot: 'bg-brand-gold',        bg: 'bg-brand-gold/10',        text: 'text-brand-goldlight',   border: 'border-brand-gold/30' },
   'Active Partner': { dot: 'bg-status-active',     bg: 'bg-status-active/10',     text: 'text-status-active',     border: 'border-status-active/25' },
 };
+
+type PracticeArea = 'Criminal Defense' | 'White Collar' | 'DUI' | 'Federal' | 'Drug Crimes';
+
+interface IndexedAttorney {
+  id: string;
+  name: string;
+  firm: string;
+  city: string;
+  practice: PracticeArea;
+  stage: PipelineStage;
+}
+
+const QUICK_CITIES = ['Los Angeles', 'San Jose', 'San Diego', 'Oakland', 'Santa Ana', 'Redwood City'] as const;
+
+const PRACTICE_STYLES: Record<PracticeArea, string> = {
+  'Criminal Defense': 'border-status-plan/25 bg-status-plan/10 text-status-plan',
+  'White Collar':     'border-brand-gold/30 bg-brand-gold/10 text-brand-goldlight',
+  'DUI':              'border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300',
+  'Federal':          'border-status-legal/25 bg-status-legal/10 text-status-legal',
+  'Drug Crimes':      'border-cyan-500/25 bg-cyan-500/10 text-cyan-300',
+};
+
+const INDEXED_ATTORNEYS: IndexedAttorney[] = [
+  // Los Angeles · 12
+  { id: 'la-01', name: 'Daniel Cho',           firm: 'Cho & Associates',           city: 'Los Angeles', practice: 'White Collar',     stage: 'Active Partner' },
+  { id: 'la-02', name: 'Priya Ramanathan',     firm: 'Ramanathan Defense LLP',     city: 'Los Angeles', practice: 'Federal',          stage: 'Active Partner' },
+  { id: 'la-03', name: 'Marcus Williams',      firm: 'Williams Trial Group',       city: 'Los Angeles', practice: 'Criminal Defense', stage: 'Warm Response'  },
+  { id: 'la-04', name: 'Aisha Patel',          firm: 'Patel Law',                  city: 'Los Angeles', practice: 'Drug Crimes',      stage: 'Engaged'        },
+  { id: 'la-05', name: 'Sophia Nakamura',      firm: 'Nakamura Law Group',         city: 'Los Angeles', practice: 'Federal',          stage: 'Outreach Sent'  },
+  { id: 'la-06', name: 'Carlos Vasquez',       firm: 'Vasquez & Partners',         city: 'Los Angeles', practice: 'Criminal Defense', stage: 'Outreach Sent'  },
+  { id: 'la-07', name: 'Tasha Robinson',       firm: 'Robinson Defense',           city: 'Los Angeles', practice: 'White Collar',     stage: 'Engaged'        },
+  { id: 'la-08', name: 'Brian O\u2019Connell', firm: 'O\u2019Connell Trial Law',   city: 'Los Angeles', practice: 'DUI',              stage: 'Outreach Sent'  },
+  { id: 'la-09', name: 'Imani Brooks',         firm: 'Brooks Criminal Defense',    city: 'Los Angeles', practice: 'Criminal Defense', stage: 'Warm Response'  },
+  { id: 'la-10', name: 'Hector Salazar',       firm: 'Salazar Law Office',         city: 'Los Angeles', practice: 'Drug Crimes',      stage: 'New Lead'       },
+  { id: 'la-11', name: 'Naomi Greenberg',      firm: 'Greenberg & Stein',          city: 'Los Angeles', practice: 'White Collar',     stage: 'Outreach Sent'  },
+  { id: 'la-12', name: 'Andre Thompson',       firm: 'Thompson Bail Defense',      city: 'Los Angeles', practice: 'Criminal Defense', stage: 'New Lead'       },
+
+  // San Jose · 10
+  { id: 'sj-01', name: 'Sarah Chen',           firm: 'Chen Legal',                 city: 'San Jose',    practice: 'Criminal Defense', stage: 'Warm Response'  },
+  { id: 'sj-02', name: 'David Park',           firm: 'Park Defense',               city: 'San Jose',    practice: 'DUI',              stage: 'Engaged'        },
+  { id: 'sj-03', name: 'Maria Gutierrez',      firm: 'Gutierrez & Partners',       city: 'San Jose',    practice: 'Federal',          stage: 'Active Partner' },
+  { id: 'sj-04', name: 'Mei-Lin Wong',         firm: 'Wong Criminal Defense',      city: 'San Jose',    practice: 'White Collar',     stage: 'Engaged'        },
+  { id: 'sj-05', name: 'Rajiv Mehta',          firm: 'Mehta Trial Law',            city: 'San Jose',    practice: 'Federal',          stage: 'Outreach Sent'  },
+  { id: 'sj-06', name: 'Heather Lindgren',     firm: 'Lindgren Defense',           city: 'San Jose',    practice: 'Criminal Defense', stage: 'Outreach Sent'  },
+  { id: 'sj-07', name: 'Khalid Rahman',        firm: 'Rahman Legal Group',         city: 'San Jose',    practice: 'Drug Crimes',      stage: 'New Lead'       },
+  { id: 'sj-08', name: 'Olivia Tran',          firm: 'Tran & Associates',          city: 'San Jose',    practice: 'DUI',              stage: 'Outreach Sent'  },
+  { id: 'sj-09', name: 'Jonathan Reyes',       firm: 'Reyes Criminal Defense',     city: 'San Jose',    practice: 'Criminal Defense', stage: 'Warm Response'  },
+  { id: 'sj-10', name: 'Elena Sorensen',       firm: 'Sorensen Law',               city: 'San Jose',    practice: 'White Collar',     stage: 'New Lead'       },
+
+  // San Diego · 10
+  { id: 'sd-01', name: 'James Rodriguez',      firm: 'Rodriguez Law',              city: 'San Diego',   practice: 'DUI',              stage: 'Engaged'        },
+  { id: 'sd-02', name: 'Linda Tran',           firm: 'Tran Defense',               city: 'San Diego',   practice: 'Criminal Defense', stage: 'Active Partner' },
+  { id: 'sd-03', name: 'Omar Saleh',           firm: 'Saleh Trial Group',          city: 'San Diego',   practice: 'Federal',          stage: 'Warm Response'  },
+  { id: 'sd-04', name: 'Bianca Lopez',         firm: 'Lopez Criminal Defense',     city: 'San Diego',   practice: 'Drug Crimes',      stage: 'Outreach Sent'  },
+  { id: 'sd-05', name: 'Marcus Bell',          firm: 'Bell & Whitaker',            city: 'San Diego',   practice: 'White Collar',     stage: 'Outreach Sent'  },
+  { id: 'sd-06', name: 'Jenny Kim',            firm: 'Kim Law Office',             city: 'San Diego',   practice: 'DUI',              stage: 'Engaged'        },
+  { id: 'sd-07', name: 'Devon Wallace',        firm: 'Wallace Defense Firm',       city: 'San Diego',   practice: 'Criminal Defense', stage: 'New Lead'       },
+  { id: 'sd-08', name: 'Camila Ortiz',         firm: 'Ortiz Bail Defense',         city: 'San Diego',   practice: 'Criminal Defense', stage: 'Outreach Sent'  },
+  { id: 'sd-09', name: 'Theodore Schmidt',     firm: 'Schmidt & Reilly',           city: 'San Diego',   practice: 'Federal',          stage: 'Warm Response'  },
+  { id: 'sd-10', name: 'Anaya Sharma',         firm: 'Sharma Legal',               city: 'San Diego',   practice: 'White Collar',     stage: 'New Lead'       },
+
+  // Oakland · 8
+  { id: 'oa-01', name: 'Jamal Bennett',        firm: 'Bennett Trial Group',        city: 'Oakland',     practice: 'Criminal Defense', stage: 'Active Partner' },
+  { id: 'oa-02', name: 'Yuki Tanaka',          firm: 'Tanaka Defense',             city: 'Oakland',     practice: 'White Collar',     stage: 'Engaged'        },
+  { id: 'oa-03', name: 'Latisha Coleman',      firm: 'Coleman Law',                city: 'Oakland',     practice: 'Drug Crimes',      stage: 'Warm Response'  },
+  { id: 'oa-04', name: 'Felipe Aguilar',       firm: 'Aguilar Criminal Defense',   city: 'Oakland',     practice: 'DUI',              stage: 'Outreach Sent'  },
+  { id: 'oa-05', name: 'Hannah Goldberg',      firm: 'Goldberg & Cohen',           city: 'Oakland',     practice: 'Federal',          stage: 'Outreach Sent'  },
+  { id: 'oa-06', name: 'Tyrell Jackson',       firm: 'Jackson Legal Group',        city: 'Oakland',     practice: 'Criminal Defense', stage: 'New Lead'       },
+  { id: 'oa-07', name: 'Ingrid Petersen',      firm: 'Petersen Defense',           city: 'Oakland',     practice: 'White Collar',     stage: 'Engaged'        },
+  { id: 'oa-08', name: 'Rashid Ali',           firm: 'Ali Trial Law',              city: 'Oakland',     practice: 'Drug Crimes',      stage: 'Outreach Sent'  },
+
+  // Santa Ana · 8
+  { id: 'sa-01', name: 'Carlos Mendoza',       firm: 'Mendoza Criminal',           city: 'Santa Ana',   practice: 'DUI',              stage: 'Warm Response'  },
+  { id: 'sa-02', name: 'Rachel Goldberg',      firm: 'Goldberg Defense',           city: 'Santa Ana',   practice: 'Federal',          stage: 'Engaged'        },
+  { id: 'sa-03', name: 'Pedro Castillo',       firm: 'Castillo & Sons',            city: 'Santa Ana',   practice: 'Criminal Defense', stage: 'Outreach Sent'  },
+  { id: 'sa-04', name: 'Vivian Park',          firm: 'Park Defense Firm',          city: 'Santa Ana',   practice: 'White Collar',     stage: 'Outreach Sent'  },
+  { id: 'sa-05', name: 'Salim Haddad',         firm: 'Haddad Law',                 city: 'Santa Ana',   practice: 'Drug Crimes',      stage: 'New Lead'       },
+  { id: 'sa-06', name: 'Adriana Beltran',      firm: 'Beltran Trial Group',        city: 'Santa Ana',   practice: 'Criminal Defense', stage: 'Engaged'        },
+  { id: 'sa-07', name: 'Conor Mahoney',        firm: 'Mahoney & Walsh',            city: 'Santa Ana',   practice: 'DUI',              stage: 'Outreach Sent'  },
+  { id: 'sa-08', name: 'Priscilla Nguyen',     firm: 'Nguyen Criminal Defense',    city: 'Santa Ana',   practice: 'Federal',          stage: 'Active Partner' },
+
+  // Redwood City · 6
+  { id: 'rc-01', name: 'Anthony Marino',       firm: 'Marino & Associates',        city: 'Redwood City', practice: 'White Collar',     stage: 'Active Partner' },
+  { id: 'rc-02', name: 'Jasmine Wu',           firm: 'Wu Trial Law',               city: 'Redwood City', practice: 'Criminal Defense', stage: 'Warm Response'  },
+  { id: 'rc-03', name: 'Derek Sullivan',       firm: 'Sullivan Defense',           city: 'Redwood City', practice: 'Federal',          stage: 'Engaged'        },
+  { id: 'rc-04', name: 'Lakshmi Iyer',         firm: 'Iyer Legal Group',           city: 'Redwood City', practice: 'White Collar',     stage: 'Outreach Sent'  },
+  { id: 'rc-05', name: 'Trevor Olsen',         firm: 'Olsen Criminal Defense',     city: 'Redwood City', practice: 'DUI',              stage: 'New Lead'       },
+  { id: 'rc-06', name: 'Mariana Costa',        firm: 'Costa Bail Defense',         city: 'Redwood City', practice: 'Criminal Defense', stage: 'Outreach Sent'  },
+
+  // Long Beach · 3
+  { id: 'lb-01', name: 'Robert Kim',           firm: 'Kim Defense',                city: 'Long Beach',  practice: 'DUI',              stage: 'Engaged'        },
+  { id: 'lb-02', name: 'Stephanie Adebayo',    firm: 'Adebayo Trial Law',          city: 'Long Beach',  practice: 'Criminal Defense', stage: 'Outreach Sent'  },
+  { id: 'lb-03', name: 'Greg Sanderson',       firm: 'Sanderson & Cole',           city: 'Long Beach',  practice: 'White Collar',     stage: 'New Lead'       },
+
+  // Anaheim · 3
+  { id: 'an-01', name: 'Sophia Castellanos',   firm: 'Castellanos Law',            city: 'Anaheim',     practice: 'Criminal Defense', stage: 'Warm Response'  },
+  { id: 'an-02', name: 'Bryan Nakamura',       firm: 'Nakamura Defense',           city: 'Anaheim',     practice: 'Federal',          stage: 'Outreach Sent'  },
+  { id: 'an-03', name: 'Chantel Davis',        firm: 'Davis Criminal Defense',     city: 'Anaheim',     practice: 'DUI',              stage: 'Engaged'        },
+];
 
 const ATTORNEYS: AttorneyRow[] = [
   { id: 'att-01', name: 'Daniel Cho',           firm: 'Cho & Associates',                   county: 'Los Angeles',     stage: 'Active Partner', lastTouch: '2h ago',     action: 'View Thread'    },
@@ -180,6 +280,8 @@ export function AttorneyPipeline() {
         />
       </div>
 
+      <CitySearchSection />
+
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
         <div className="xl:col-span-3">
           <PipelineTable rows={filtered} filter={filter} onFilter={setFilter} />
@@ -191,6 +293,215 @@ export function AttorneyPipeline() {
       </div>
 
       <PartnershipWinsCard wins={PARTNERSHIP_WINS} />
+    </motion.div>
+  );
+}
+
+function CitySearchSection() {
+  const [query, setQuery] = useState('');
+  const [debounced, setDebounced] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebounced(query.trim()), 200);
+    return () => window.clearTimeout(id);
+  }, [query]);
+
+  const results = useMemo(() => {
+    if (!debounced) return [];
+    const needle = debounced.toLowerCase();
+    return INDEXED_ATTORNEYS.filter((a) => a.city.toLowerCase().includes(needle));
+  }, [debounced]);
+
+  const matchedCity = useMemo(() => {
+    if (!debounced) return null;
+    const needle = debounced.toLowerCase();
+    const match = INDEXED_ATTORNEYS.find((a) => a.city.toLowerCase().includes(needle));
+    return match?.city ?? debounced;
+  }, [debounced]);
+
+  const showResults = debounced.length > 0;
+  const visibleResults = results.slice(0, 12);
+
+  const handleClear = () => {
+    setQuery('');
+    setDebounced('');
+    inputRef.current?.focus();
+  };
+
+  const handleChip = (city: string) => {
+    setQuery(city);
+    setDebounced(city);
+    inputRef.current?.focus();
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.1 }}
+      className="space-y-4"
+    >
+      <div className="glass-card overflow-hidden p-6">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/8 via-transparent to-transparent" />
+
+        <div className="relative">
+          <div className="label text-brand-goldlight/80">Statewide Index · Compass Scraper</div>
+          <h2 className="mt-1.5 h-display text-2xl">Search Attorneys by City</h2>
+          <p className="mt-1 text-sm text-slate-400">
+            14,847 attorneys indexed across all 58 California counties
+          </p>
+
+          <div className="mt-5 group relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500 transition-colors group-focus-within:text-brand-gold" />
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              type="text"
+              placeholder="Type a California city (e.g., Los Angeles, San Diego, Oakland, San Jose, Santa Ana, Redwood City)"
+              className="h-14 w-full rounded-xl border border-border bg-bg-surface/80 pl-12 pr-12 text-base text-slate-100 placeholder:text-slate-500 transition-all focus:border-brand-gold/60 focus:bg-bg-surface focus:outline-none focus:ring-2 focus:ring-brand-gold/20"
+              aria-label="Search attorneys by California city"
+            />
+            {query && (
+              <button
+                onClick={handleClear}
+                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-lg border border-border bg-bg-elevated/80 text-slate-400 transition-all hover:border-border-strong hover:bg-bg-raised hover:text-white"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500">Quick search</span>
+            {QUICK_CITIES.map((city) => {
+              const active = debounced.toLowerCase() === city.toLowerCase();
+              return (
+                <button
+                  key={city}
+                  onClick={() => handleChip(city)}
+                  className={cn(
+                    'cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
+                    active
+                      ? 'border-brand-gold/40 bg-brand-gold/10 text-brand-goldlight'
+                      : 'border-border bg-bg-elevated/60 text-slate-300 hover:border-brand-gold/40 hover:bg-brand-gold/10 hover:text-brand-goldlight',
+                  )}
+                >
+                  {city}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {showResults && (
+          <motion.div
+            key={debounced}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            className="glass-card p-6"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-brand-gold" />
+                <h3 className="h-display text-base">
+                  {results.length === 0 ? (
+                    <span className="text-slate-300">0 attorneys in <span className="text-white">{matchedCity}</span></span>
+                  ) : (
+                    <span className="text-slate-300">
+                      <span className="text-white">{results.length}</span> attorney{results.length === 1 ? '' : 's'} in{' '}
+                      <span className="text-brand-goldlight">{matchedCity}</span>
+                    </span>
+                  )}
+                </h3>
+              </div>
+              {results.length > 0 && (
+                <span className="chip text-slate-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-status-active" />
+                  showing {visibleResults.length} of {results.length}
+                </span>
+              )}
+            </div>
+
+            {results.length === 0 ? (
+              <div className="mt-6 flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-bg-elevated/30 px-6 py-12 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-bg-elevated/60">
+                  <Search className="h-5 w-5 text-slate-500" />
+                </div>
+                <p className="mt-4 text-sm font-medium text-slate-200">
+                  No attorneys found in {matchedCity} yet.
+                </p>
+                <p className="mt-1 max-w-md text-xs text-slate-500">
+                  Compass will sweep this county on the next sync.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {visibleResults.map((att, i) => (
+                  <SearchResultCard key={att.id} attorney={att} index={i} />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function SearchResultCard({ attorney, index }: { attorney: IndexedAttorney; index: number }) {
+  const stage = STAGE_STYLES[attorney.stage];
+  const isConverted = attorney.stage === 'Active Partner';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: Math.min(index * 0.025, 0.25) }}
+      className="group relative overflow-hidden rounded-xl border border-border bg-bg-elevated/40 p-4 transition-all hover:border-brand-gold/30 hover:bg-bg-elevated/70"
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-gold/30 bg-brand-gold/10 text-sm font-semibold text-brand-goldlight">
+          {initials(attorney.name)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-semibold text-white">{attorney.name}</div>
+          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-400">
+            <Building2 className="h-3 w-3 text-slate-500" />
+            <span className="truncate">{attorney.firm}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className={cn(
+          'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider',
+          PRACTICE_STYLES[attorney.practice],
+        )}>
+          {attorney.practice}
+        </span>
+        <span className={cn(
+          'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium',
+          stage.bg, stage.text, stage.border,
+        )}>
+          <span className={cn('h-1.5 w-1.5 rounded-full', stage.dot)} />
+          {attorney.stage}
+        </span>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between border-t border-border-subtle pt-3">
+        <span className="font-mono text-[10px] text-slate-500">via Compass · State Bar</span>
+        <button className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-border bg-bg-surface/80 px-2.5 py-1 text-[11px] font-medium text-brand-goldlight transition-all hover:border-brand-gold/40 hover:bg-brand-gold/10">
+          {isConverted ? <Send className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+          {isConverted ? 'Send Outreach' : 'Add to Pipeline'}
+        </button>
+      </div>
     </motion.div>
   );
 }
