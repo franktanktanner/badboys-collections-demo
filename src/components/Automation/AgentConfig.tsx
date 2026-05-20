@@ -45,21 +45,14 @@ export function AgentConfig() {
                 on ? 'border-brand-gold/25 bg-brand-gold/[0.04]' : 'border-border bg-bg-elevated/40',
               )}
             >
-              <div className="mb-3 flex items-center gap-2">
+              <div className="mb-2 flex items-center" style={{ gap: '8px' }}>
                 <div
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-                  style={{ backgroundColor: '#7A1F1F' }}
-                >
-                  <span
-                    className="font-mono font-bold"
-                    style={{ color: '#D4A853', fontSize: '12px' }}
-                  >
-                    {f.agent.charAt(0)}
-                  </span>
-                </div>
+                  className="shrink-0"
+                  style={{ width: '24px', height: '2px', backgroundColor: '#7A1F1F' }}
+                />
                 <span
-                  className="font-mono"
-                  style={{ color: '#D4A853', fontSize: '12px', letterSpacing: '1.5px' }}
+                  className="font-mono font-medium"
+                  style={{ color: '#A8A296', fontSize: '11px', letterSpacing: '2px' }}
                 >
                   {f.agent}
                 </span>
